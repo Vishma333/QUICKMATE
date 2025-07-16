@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediScanAI - Consult a Doctor</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Embedded CSS (Copied from index.html for consistency) -->
+  <style>
+    :root {
+      --primary-color: #08a997;
+      --primary-dark: #068a7c;
+      --primary-glow: rgba(8, 169, 151, 0.4);
+      --phone-body: #f4f7f7;
+      --page-bg: #aed7d3;
+      --text-primary: #1a2e2c;
+      --text-secondary: #657472;
+      --white-color: #ffffff;
+      --border-color: #dde4e3;
+      --border-radius-phone: 40px;
+      --spacing-unit: 8px;
+      --transition-fast: 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; width: 100%; overflow: hidden; font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--page-bg); display: flex; align-items: center; justify-content: center; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    .smartphone { width: 360px; height: 680px; background-color: var(--white-color); border: none; padding: 0; border-radius: var(--border-radius-phone); box-shadow: 0 25px 60px -12px rgba(0,0,0,0.25), 0 0px 15px rgba(0,0,0,0.1); display: flex; overflow: hidden; }
+    .screen-content { width: 100%; height: 100%; background-color: var(--phone-body); border-radius: var(--border-radius-phone); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+    .app-header, .app-main, .app-footer { transition: filter 0.3s ease; }
+    .screen-content.chatbot-is-open > *:not(.chatbot-wrapper) { filter: blur(3px) saturate(0.9); pointer-events: none; }
+    .app-header { display: flex; justify-content: space-between; align-items: center; padding: calc(var(--spacing-unit) * 3) calc(var(--spacing-unit) * 2.5); flex-shrink: 0; }
+    .app-main { flex-grow: 1; display: flex; flex-direction: column; align-items: center; padding: 0 calc(var(--spacing-unit) * 3); text-align: center; justify-content: center; }
+    .app-main h1 { color: var(--text-primary); font-size: 26px; font-weight: 800; }
+    .app-main p { color: var(--text-secondary); font-size: 15px; line-height: 1.6; margin-top: calc(var(--spacing-unit) * 1.5); max-width: 280px; }
+    .app-footer { flex-shrink: 0; display: flex; justify-content: space-around; align-items: center; padding: var(--spacing-unit) calc(var(--spacing-unit) * 2.5) calc(var(--spacing-unit) * 3); background: linear-gradient(to top, var(--phone-body) 30%, transparent); margin-top: auto; }
+    .icon-btn { background: transparent; border: none; cursor: pointer; padding: var(--spacing-unit); border-radius: 50%; display: inline-flex; transition: all var(--transition-fast); -webkit-tap-highlight-color: transparent; text-decoration: none; }
+    .icon-btn svg { width: 28px; height: 28px; stroke: var(--text-secondary); stroke-width: 1.7; fill: none; transition: all var(--transition-fast); }
+    .icon-btn:not(.icon-btn--primary):hover { transform: translateY(-3px); background-color: #e8f0ef; }
+    .icon-btn:not(.icon-btn--primary):hover svg { stroke: var(--primary-dark); }
+    .icon-btn--primary { background-color: var(--primary-color); box-shadow: 0 4px 15px var(--primary-glow); }
+    .icon-btn--primary svg { width: 44px; height: 44px; stroke: var(--white-color); }
+    .icon-btn--primary:hover { background-color: var(--primary-dark); transform: translateY(-4px) scale(1.05); box-shadow: 0 8px 20px var(--primary-glow); }
+    .disclaimer-box { background-color: #fff1f1; border: 1px solid #f9d3d3; padding: 16px; border-radius: 12px; margin-top: 24px;}
+    .disclaimer-box p { font-size: 13px !important; color: #b91c1c; margin: 0; text-align: center; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .app-main > *, .app-header > *, .app-footer > * { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+    /* --- CHATBOT STYLES --- (Copied from index.html) */
+    .chatbot-wrapper { z-index: 100; }
+    .chatbot-fab { position: absolute; bottom: 85px; right: 20px; width: 50px; height: 50px; background-color: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 5px 20px var(--primary-glow); transition: transform 0.2s ease, box-shadow 0.2s ease; z-index: 1000; }
+    .chatbot-fab:hover { transform: scale(1.1); box-shadow: 0 8px 25px var(--primary-glow); }
+    .chatbot-fab svg { position: absolute; width: 28px; height: 28px; stroke: var(--white-color); stroke-width: 2; transition: transform 0.3s ease, opacity 0.3s ease; }
+    .chatbot-fab .icon-close { transform: rotate(-90deg) scale(0); opacity: 0; }
+    .chatbot-fab.open .icon-chat { transform: rotate(90deg) scale(0); opacity: 0; }
+    .chatbot-fab.open .icon-close { transform: rotate(0) scale(1); opacity: 1; }
+    .chatbot-window { position: absolute; bottom: 145px; right: 20px; width: 300px; height: 400px; background-color: var(--white-color); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; transform-origin: bottom right; transform: translateY(20px) scale(0.95); opacity: 0; visibility: hidden; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, visibility 0.3s; z-index: 999; }
+    .chatbot-window.open { transform: translateY(0) scale(1); opacity: 1; visibility: visible; }
+    .chatbot-header { padding: 16px; background-color: var(--phone-body); border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+    .chatbot-header h3 { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+    .chatbot-messages { flex-grow: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .chatbot-messages::-webkit-scrollbar { width: 5px; } .chatbot-messages::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; } .chatbot-messages::-webkit-scrollbar-track { background: transparent; }
+    .message { display: flex; max-width: 80%; font-size: 14px; line-height: 1.5; animation: message-in 0.3s ease forwards; }
+    @keyframes message-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .message-content { padding: 10px 14px; border-radius: 18px; }
+    .ai-message { align-self: flex-start; }
+    .ai-message .message-content { background-color: var(--phone-body); color: var(--text-primary); border-top-left-radius: 4px; }
+    .user-message { align-self: flex-end; }
+    .user-message .message-content { background-color: var(--primary-color); color: var(--white-color); border-top-right-radius: 4px; }
+    .typing-indicator { display: flex; align-items: center; gap: 5px; padding: 10px 14px; }
+    .typing-indicator span { width: 8px; height: 8px; background-color: #ccc; border-radius: 50%; animation: typing-dots 1.2s infinite ease-in-out; }
+    .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing-dots { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+    .chatbot-input-form { display: flex; align-items: center; padding: 10px; border-top: 1px solid var(--border-color); }
+    .chatbot-tool-btn { width: 36px; height: 36px; background: transparent; border: none; border-radius: 50%; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background-color var(--transition-fast); margin-right: 6px; }
+    .chatbot-tool-btn:hover { background-color: #e8f0ef; }
+    .chatbot-tool-btn svg { width: 22px; height: 22px; stroke: var(--text-secondary); stroke-width: 1.5; }
+    #chatbot-input { flex-grow: 1; border: none; outline: none; background: transparent; padding: 10px; font-size: 14px; color: var(--text-primary); font-family: inherit; }
+    #chatbot-send-btn { width: 36px; height: 36px; background: var(--primary-color); border: none; border-radius: 50%; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background-color var(--transition-fast); }
+    #chatbot-send-btn:hover { background: var(--primary-dark); }
+    #chatbot-send-btn svg { width: 18px; height: 18px; stroke: var(--white-color); stroke-width: 2.5; }
+  </style>
+</head>
+<body>
+  <div class="smartphone">
+    <div class="screen-content">
+      <header class="app-header">
+        <a href="#" class="icon-btn" aria-label="Menu" title="Menu"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 6l16 0"/><path d="M4 12l16 0"/><path d="M4 18l16 0"/></svg></a>
+        <a href="#" class="icon-btn" aria-label="Profile" title="Profile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855"/></svg></a>
+      </header>
+
+      <!-- Page specific content -->
+      <main class="app-main">
+        <h1>Consult a Doctor</h1>
+        <p>This AI tool provides suggestions and is not a substitute for professional medical advice.</p>
+        
+        <div class="disclaimer-box">
+          <p><strong>Emergency:</strong> If you are experiencing a medical emergency, please call your local emergency services immediately.</p>
+        </div>
+      </main>
+
+      <!-- Shared footer for navigation -->
+      <footer class="app-footer">
+        <a href="/scanning" class="icon-btn" aria-label="First Aid Guide" title="First Aid Guide"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 8v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"/><path d="M4 8m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M10 14h4"/><path d="M12 12v4"/></svg></a>
+        <a href="/" class="icon-btn icon-btn--primary" aria-label="Scan Injury" title="Scan Injury"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 7v-1a2 2 0 0 1 2 -2h1"/><path d="M4 17v1a2 2 0 0 0 2 2h1"/><path d="M16 4h1a2 2 0 0 1 2 2v1"/><path d="M16 20h1a2 2 0 0 0 2 -2v-1"/><path d="M5 12l14 0"/></svg></a>
+        <a href="/consult" class="icon-btn" aria-label="Consult a Doctor" title="Consult a Doctor"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 4h-1a2 2 0 0 0 -2 2v3.5h0a5.5 5.5 0 0 0 11 0v-3.5a2 2 0 0 0 -2 -2h-1"/><path d="M8 15a6 6 0 1 0 12 0v-3"/><path d="M11 3v2"/><path d="M6 3v2"/><path d="M20 10m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/></svg></a>
+      </footer>
+
+      <!-- CHATBOT HTML (Copied from index.html) -->
+      <div class="chatbot-wrapper">
+        <div class="chatbot-fab" id="chatbot-fab" role="button" aria-label="Open AI Assistant">
+            <svg class="icon-chat" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8a8.5 8.5 0 0 1-7.6 4.7a8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8a8.5 8.5 0 0 1 4.7-7.6a8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            <svg class="icon-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </div>
+        <div class="chatbot-window" id="chatbot-window">
+          <div class="chatbot-header"><h3>AI Assistant</h3></div>
+          <div class="chatbot-messages" id="chatbot-messages"></div>
+          <form class="chatbot-input-form" id="chatbot-input-form">
+              <button type="button" class="chatbot-tool-btn" id="chatbot-clear-btn" aria-label="Clear Conversation" title="Clear Conversation"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-paint" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><rect x="5" y="3" width="14" height="6" rx="2"></rect><path d="M19 6h1a2 2 0 0 1 2 2a5 5 0 0 1 -5 5h-4a5 5 0 0 1 -5 -5a2 2 0 0 1 2 -2h1"></path><path d="M12 16v3"></path></svg></button>
+              <input type="text" id="chatbot-input" placeholder="Ask anything..." autocomplete="off">
+              <button id="chatbot-send-btn" type="submit" aria-label="Send Message"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+   <script>
+    // Universal script for all pages
+    document.addEventListener('DOMContentLoaded', () => {
+      // --- CHATBOT SCRIPT --- (This runs on all pages)
+      const screenContent = document.querySelector('.screen-content');
+      const chatbotFab = document.getElementById('chatbot-fab');
+      const chatbotWindow = document.getElementById('chatbot-window');
+      const chatbotMessages = document.getElementById('chatbot-messages');
+      const chatbotInputForm = document.getElementById('chatbot-input-form');
+      const chatbotInput = document.getElementById('chatbot-input');
+      const chatbotClearBtn = document.getElementById('chatbot-clear-btn');
+      const toggleChatbot = () => { screenContent.classList.toggle('chatbot-is-open'); chatbotWindow.classList.toggle('open'); chatbotFab.classList.toggle('open'); };
+      const addMessage = (text, sender) => { removeTypingIndicator(); const messageElement = document.createElement('div'); messageElement.classList.add('message', `${sender}-message`); const messageContent = document.createElement('div'); messageContent.classList.add('message-content'); messageContent.textContent = text; messageElement.appendChild(messageContent); chatbotMessages.appendChild(messageElement); chatbotMessages.scrollTop = chatbotMessages.scrollHeight; };
+      const showTypingIndicator = () => { const typingIndicator = document.createElement('div'); typingIndicator.classList.add('message', 'ai-message'); typingIndicator.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`; typingIndicator.id = 'typing-indicator'; chatbotMessages.appendChild(typingIndicator); chatbotMessages.scrollTop = chatbotMessages.scrollHeight; };
+      const removeTypingIndicator = () => { const indicator = document.getElementById('typing-indicator'); if (indicator) { indicator.remove(); } };
+      const clearChat = () => { chatbotMessages.innerHTML = ''; addMessage("Hello! How can I help you today?", 'ai'); }
+      chatbotInputForm.addEventListener('submit', (e) => { e.preventDefault(); const userText = chatbotInput.value.trim(); if (userText === '') return; addMessage(userText, 'user'); chatbotInput.value = ''; showTypingIndicator(); const formData = new FormData(); formData.append('message', userText); fetch('/get_chatbot_response', { method: 'POST', body: formData }).then(response => response.json()).then(data => { addMessage(data.response, 'ai'); }).catch(error => { console.error('Chatbot error:', error); addMessage("Sorry, I'm having trouble connecting. Please try again later.", 'ai'); }); });
+      chatbotFab.addEventListener('click', toggleChatbot);
+      chatbotClearBtn.addEventListener('click', clearChat);
+      clearChat();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MediScanAI - Medical Image Analysis</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+   
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+   
+    <style>
+      :root {
+        --primary-color: #08a997;
+        --primary-dark: #068a7c;
+        --primary-glow: rgba(8, 169, 151, 0.4);
+        --phone-body: #f4f7f7;
+        --page-bg: #aed7d3;
+        --text-primary: #1a2e2c;
+        --text-secondary: #657472;
+        --white-color: #ffffff;
+        --border-color: #dde4e3;
+        --border-radius-phone: 40px;
+        --spacing-unit: 8px;
+        --transition-fast: 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --transition-smooth: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+       
+        --light-grey: #f0f0f0;
+        --medium-grey: #ccc;
+        --dark-grey: #555;
+        --active-color: #08a997; 
+        --primary-color-dark: #068a7c;
+        --shadow-light: rgba(0, 0, 0, 0.1);
+        --shadow-medium: rgba(0, 0, 0, 0.15);
+        --danger-color: #e53935;
+      }
+
+      * {
+        margin: 0; padding: 0; box-sizing: border-box;
+      }
+
+      html, body {
+        height: 100%; width: 100%;
+        font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+
+      body {
+        background-color: var(--page-bg);
+        display: flex; align-items: center; justify-content: center;
+        -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+        padding: 20px 0;
+      }
+
+      .smartphone {
+        width: 360px; height: 100%; max-height: 720px; background-color: var(--white-color);
+        border: none; padding: 0;
+        border-radius: var(--border-radius-phone);
+        box-shadow: 0 25px 60px -12px rgba(0,0,0,0.25), 0 0px 15px rgba(0,0,0,0.1);
+        display: flex; overflow: hidden;
+      }
+
+      .screen-content {
+        width: 100%; height: 100%; background-color: var(--phone-body);
+        border-radius: var(--border-radius-phone);
+        display: flex; flex-direction: column; overflow: hidden;
+        position: relative;
+        transition: box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease-out;
+      }
+      
+     
+      .app-header, .app-main, .app-footer, .chatbot-wrapper, .slide-out, .user-slide-out {
+          transition: filter 0.3s ease;
+      }
+      
+      .screen-content.chatbot-is-open > *:not(.chatbot-wrapper),
+      .screen-content.slide-active > *:not(.slide-out),
+      .screen-content.user-slide-active > *:not(.user-slide-out),
+      .screen-content.modal-is-open > *:not(.reminder-modal-overlay) {
+        filter: blur(3px) saturate(0.9);
+        pointer-events: none;
+      }
+
+      .screen-content.slide-active { box-shadow: 5px 8px 25px rgba(0, 0, 0, 0.2); }
+      .screen-content.user-slide-active { box-shadow: -5px 8px 25px rgba(0, 0, 0, 0.2); }
+     
+      .screen-content.user-slide-active .chatbot-wrapper,
+      .screen-content.slide-active .chatbot-wrapper {
+        display: none;
+      }
+    
+
+      .app-header {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: calc(var(--spacing-unit) * 3) calc(var(--spacing-unit) * 2.5); flex-shrink: 0;
+        position: relative;
+        z-index: 20;
+      }
+
+      .app-main {
+        flex-grow: 1; display: flex; flex-direction: column;
+        padding: 0 calc(var(--spacing-unit) * 3); overflow-y: auto;
+      }
+      .app-main::-webkit-scrollbar { display: none; }
+      .app-main { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      .main-content-wrapper {
+        text-align: center;
+      }
+      
+      .main-content-wrapper h1 { color: var(--text-primary); font-size: 26px; font-weight: 800; }
+      .main-content-wrapper p {
+        color: var(--text-secondary); font-size: 15px; line-height: 1.6;
+        margin-top: calc(var(--spacing-unit) * 1.5); max-width: 280px;
+        margin-left: auto; margin-right: auto;
+      }
+
+      .app-footer {
+        flex-shrink: 0; display: flex; justify-content: space-around; align-items: center;
+        padding: var(--spacing-unit) calc(var(--spacing-unit) * 2.5) calc(var(--spacing-unit) * 3);
+        background: linear-gradient(to top, var(--phone-body) 30%, transparent); margin-top: auto;
+        position: relative;
+        z-index: 20;
+      }
+
+      .icon-btn {
+        background: transparent; border: none; cursor: pointer; padding: var(--spacing-unit);
+        border-radius: 50%; display: inline-flex; transition: all var(--transition-fast);
+        -webkit-tap-highlight-color: transparent; text-decoration: none;
+      }
+      .icon-btn svg {
+        width: 28px; height: 28px; stroke: var(--text-secondary); stroke-width: 1.7;
+        fill: none; transition: all var(--transition-fast);
+      }
+      .icon-btn:not(.icon-btn--primary):hover {
+        transform: translateY(-3px); background-color: #e8f0ef;
+      }
+      .icon-btn:not(.icon-btn--primary):hover svg { stroke: var(--primary-dark); }
+      .icon-btn--primary {
+        background-color: var(--primary-color); box-shadow: 0 4px 15px var(--primary-glow);
+      }
+      .icon-btn--primary svg { width: 44px; height: 44px; stroke: var(--white-color); }
+      .icon-btn--primary:hover {
+        background-color: var(--primary-dark); transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 8px 20px var(--primary-glow);
+      }
+      
+     
+      .upload-form { width: 100%; display: flex; flex-direction: column; align-items: center; margin-top: calc(var(--spacing-unit) * 4); gap: calc(var(--spacing-unit) * 2.5); }
+      .form-group { width: 100%; text-align: left; }
+      .form-group label {
+        display: block; font-size: 14px; font-weight: 600;
+        color: var(--text-primary); margin-bottom: var(--spacing-unit);
+      }
+      .themed-input, .themed-select {
+        width: 100%; padding: 12px 14px;
+        border: 1px solid var(--border-color); background-color: var(--white-color);
+        border-radius: 12px; font-size: 15px; color: var(--text-primary);
+        font-family: 'Manrope', sans-serif; transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+      }
+      .themed-input:focus, .themed-select:focus {
+        outline: none; border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px var(--primary-glow);
+      }
+
+      input[name="image_file"] { display: none; } 
+      .upload-area { position: relative; width: 100%; min-height: 150px; background-color: var(--white-color); border: 2px dashed var(--border-color); border-radius: 16px; cursor: pointer; transition: all var(--transition-smooth); display: flex; align-items: center; justify-content: center; overflow: hidden; margin-top: var(--spacing-unit); } 
+      .upload-area:hover { border-color: var(--primary-color); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); } 
+      .upload-area .upload-placeholder, .upload-area .image-preview-container { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--spacing-unit); transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; } 
+      .upload-placeholder { gap: calc(var(--spacing-unit) * 1.5); color: var(--text-secondary); z-index: 2; opacity: 1; } 
+      .upload-placeholder svg { width: 48px; height: 48px; stroke: var(--text-secondary); stroke-width: 1.5; transition: all var(--transition-fast); } 
+      .upload-area:hover .upload-placeholder svg { stroke: var(--primary-color); transform: scale(1.05); } 
+      .upload-placeholder-text span { display: block; font-weight: 600; color: var(--text-primary); font-size: 16px; } 
+      .upload-placeholder-text small { font-size: 12px; color: var(--text-secondary); margin-top: 4px; } 
+      .upload-area.file-selected .upload-placeholder { opacity: 0; transform: scale(0.95); pointer-events: none; } 
+      .image-preview-container { z-index: 1; opacity: 0; pointer-events: none; transform: scale(1.05); position: relative; } 
+      .upload-area.file-selected .image-preview-container { opacity: 1; transform: scale(1); pointer-events: all; } 
+      #image-preview { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; } 
+      .change-file-btn { position: absolute; top: 10px; right: 10px; background-color: rgba(26, 46, 44, 0.7); color: var(--white-color); border: none; border-radius: 50px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); transition: background-color var(--transition-fast); z-index: 5; } 
+      .change-file-btn:hover { background-color: rgba(6, 138, 124, 0.8); } 
+      .image-preview-container::after { content: ''; position: absolute; top: -100%; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 48%, var(--primary-color) 50%, rgba(255,255,255,0.05) 52%, rgba(255,255,255,0) 100%); box-shadow: 0 0 20px var(--primary-color); opacity: 0; animation: scan 2s linear infinite; z-index: 10; display: none; } 
+      .image-preview-container.scanning::after { display: block; } @keyframes scan { to { top: 100%; } } 
+
+      .btn-analyze { position: relative; background-color: var(--primary-color); color: var(--white-color); border: none; padding: 16px 24px; font-size: 16px; font-weight: 700; border-radius: 50px; cursor: pointer; width: 100%; margin-top: var(--spacing-unit); box-shadow: 0 4px 15px var(--primary-glow); transition: all var(--transition-fast); display: flex; align-items: center; justify-content: center; text-decoration: none; } 
+      .btn-analyze:not(.loading):hover { background-color: var(--primary-dark); transform: translateY(-3px); box-shadow: 0 8px 20px var(--primary-glow); } 
+      .btn-analyze.loading { background-color: var(--primary-dark); cursor: not-allowed; } 
+      .btn-analyze .btn-text { transition: opacity var(--transition-fast); } 
+      .btn-analyze.loading .btn-text { opacity: 0; } 
+      .btn-loader { position: absolute; width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.3); border-top-color: var(--white-color); border-radius: 50%; opacity: 0; transition: opacity var(--transition-fast); animation: spin 1s linear infinite; } 
+      .btn-analyze.loading .btn-loader { opacity: 1; } @keyframes spin { to { transform: rotate(360deg); } } 
+      
+     
+      .results-wrapper { text-align: left; padding: var(--spacing-unit) 0; animation: fadeInUp 0.5s ease forwards; }
+      .result-section { background: var(--white-color); padding: calc(var(--spacing-unit) * 2); border-radius: 16px; margin-bottom: calc(var(--spacing-unit) * 2.5); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+      .result-section h3 {
+        font-size: 16px; font-weight: 700; color: var(--primary-dark);
+        margin-bottom: var(--spacing-unit); padding-bottom: var(--spacing-unit);
+        border-bottom: 1px solid var(--border-color);
+      }
+      .result-section pre {
+        white-space: pre-wrap; word-wrap: break-word; font-family: 'Manrope', sans-serif;
+        background-color: transparent; color: var(--text-secondary);
+        padding: 0; border-radius: 0; font-size: 14px; line-height: 1.6;
+      }
+      .download-btn {
+        display: flex; align-items: center; justify-content: center; width: 100%; text-align: center;
+        background-color: var(--primary-dark); text-decoration: none;
+        padding: 14px; color: var(--white-color); border-radius: 12px;
+        font-weight: 600; transition: background-color var(--transition-fast);
+      }
+      .download-btn:hover { background-color: #056a5f; }
+      .download-btn svg { width: 20px; height: 20px; margin-right: 10px; flex-shrink: 0; }
+      .download-btn span { text-align: center; flex-grow: 1; }
+
+
+      
+      @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } } 
+      .app-main > *, .app-header > *, .app-footer > * { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; } 
+      .app-header .icon-btn:first-child { animation-delay: 0.2s; } .app-header .icon-btn:last-child { animation-delay: 0.3s; } 
+      .main-content-wrapper > * { animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; opacity: 0; }
+      .main-content-wrapper h1 { animation-delay: 0.4s; } .main-content-wrapper p { animation-delay: 0.5s; } 
+      .upload-form { animation-delay: 0.6s; opacity: 0; animation-name: fadeInUp; animation-fill-mode: forwards; } 
+      .app-footer a:nth-child(1) { animation-delay: 0.8s; } .app-footer a:nth-child(3) { animation-delay: 0.9s; } .app-footer a:nth-child(2) { animation-delay: 1.0s; }
+      
+
+      .chatbot-wrapper{z-index:100}.chatbot-fab{position:absolute;bottom:85px;right:20px;width:50px;height:50px;background-color:var(--primary-color);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 5px 20px var(--primary-glow);transition:transform .2s ease,box-shadow .2s ease;z-index:1000}.chatbot-fab:hover{transform:scale(1.1);box-shadow:0 8px 25px var(--primary-glow)}.chatbot-fab svg{position:absolute;width:28px;height:28px;stroke:var(--white-color);stroke-width:2;transition:transform .3s ease,opacity .3s ease}.chatbot-fab .icon-close{transform:rotate(-90deg) scale(0);opacity:0}.chatbot-fab.open .icon-chat{transform:rotate(90deg) scale(0);opacity:0}.chatbot-fab.open .icon-close{transform:rotate(0) scale(1);opacity:1}.chatbot-window{position:absolute;bottom:145px;right:20px;width:300px;height:400px;background-color:var(--white-color);border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.15);display:flex;flex-direction:column;overflow:hidden;transform-origin:bottom right;transform:translateY(20px) scale(.95);opacity:0;visibility:hidden;transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s ease,visibility .3s;z-index:999}.chatbot-window.open{transform:translateY(0) scale(1);opacity:1;visibility:visible}.chatbot-header{padding:16px;background-color:var(--phone-body);border-bottom:1px solid var(--border-color);flex-shrink:0}.chatbot-header h3{font-size:16px;font-weight:700;color:var(--text-primary)}.chatbot-messages{flex-grow:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}.chatbot-messages::-webkit-scrollbar{width:5px}.chatbot-messages::-webkit-scrollbar-thumb{background:var(--border-color);border-radius:10px}.chatbot-messages::-webkit-scrollbar-track{background:transparent}.message{display:flex;max-width:80%;font-size:14px;line-height:1.5;animation:message-in .3s ease forwards}@keyframes message-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.message-content{padding:10px 14px;border-radius:18px}.ai-message{align-self:flex-start}.ai-message .message-content{background-color:var(--phone-body);color:var(--text-primary);border-top-left-radius:4px}.user-message{align-self:flex-end}.user-message .message-content{background-color:var(--primary-color);color:var(--white-color);border-top-right-radius:4px}.typing-indicator{display:flex;align-items:center;gap:5px;padding:10px 14px}.typing-indicator span{width:8px;height:8px;background-color:#ccc;border-radius:50%;animation:typing-dots 1.2s infinite ease-in-out}.typing-indicator span:nth-child(1){animation-delay:0s}.typing-indicator span:nth-child(2){animation-delay:.2s}.typing-indicator span:nth-child(3){animation-delay:.4s}@keyframes typing-dots{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}.chatbot-input-form{display:flex;align-items:center;padding:10px;border-top:1px solid var(--border-color)}.chatbot-tool-btn{width:36px;height:36px;background:transparent;border:none;border-radius:50%;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background-color var(--transition-fast);margin-right:6px}.chatbot-tool-btn:hover{background-color:#e8f0ef}.chatbot-tool-btn svg{width:22px;height:22px;stroke:var(--text-secondary);stroke-width:1.5}#chatbot-input{flex-grow:1;border:none;outline:none;background:transparent;padding:10px;font-size:14px;color:var(--text-primary);font-family:inherit}#chatbot-send-btn{width:36px;height:36px;background:var(--primary-color);border:none;border-radius:50%;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background-color var(--transition-fast)}#chatbot-send-btn:hover{background:var(--primary-dark)}#chatbot-send-btn svg{width:18px;height:18px;stroke:var(--white-color);stroke-width:2.5}
+     
+      
+
+  
+      .loading-spinner { font-size: 0.8em; margin-right: 8px; }
+
+      .slide-out, .user-slide-out {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: #fff;
+          transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          padding: 30px 20px 20px 20px;
+          box-sizing: border-box;
+          text-align: left;
+          overflow-y: auto;
+          will-change: transform;
+          border-radius: var(--border-radius-phone);
+          z-index: 25;
+          font-family: 'Bricolage Grotesque', sans-serif;
+      }
+
+      .slide-out { transform: translateX(-100%); }
+      .user-slide-out { transform: translateX(100%); }
+      .slide-out.active { transform: translateX(0); }
+      .user-slide-out.active { transform: translateX(0); }
+
+      .slide-out h2, .user-slide-out h2 {
+          font-size: 1.4em;
+          margin-top: 10px;
+          margin-bottom: 15px;
+          color: var(--primary-color);
+          text-align: left;
+          animation: fadeInUp 0.5s ease-out 0.1s both;
+      }
+
+      .slide-out h3, .user-slide-out h3 {
+          font-size: 1.15em;
+          margin-top: 18px;
+          margin-bottom: 8px;
+          text-align: left;
+          color: var(--primary-color-dark);
+          animation: fadeInUp 0.5s ease-out 0.2s both;
+      }
+
+      .slide-out p, .user-slide-out p {
+          font-size: 0.9em;
+          margin-bottom: 5px;
+          text-align: left;
+          color: var(--dark-grey);
+          animation: fadeInUp 0.5s ease-out 0.3s both;
+          line-height: 1.4;
+      }
+
+      .location-display {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-family: 'Manrope', sans-serif;
+          color: var(--text-secondary);
+      }
+      .hospital-list {
+          list-style-type: none;
+          padding-left: 0;
+          margin-top: 10px;
+          animation: fadeInUp 0.5s ease-out 0.4s both;
+      }
+
+      .hospital-list li {
+          margin-bottom: 8px;
+          text-align: left;
+          padding-left: 25px;
+          position: relative;
+          font-size: 0.9em;
+          display: flex;
+          align-items: center;
+          color: var(--text-secondary);
+      }
+
+      .hospital-list li::before {
+          content: "\f479";
+          font-family: "Font Awesome 6 Free";
+          font-weight: 900;
+          color: var(--active-color);
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 1.1em;
+      }
+      .hospital-list .list-placeholder {
+          color: var(--medium-grey);
+          font-style: italic;
+      }
+
+      .close-button {
+          position: absolute;
+          top: 15px;
+          right: 18px;
+          font-size: 1.7em;
+          color: var(--medium-grey);
+          cursor: pointer;
+          background: none;
+          border: none;
+          outline: none;
+          transition: color 0.2s ease, transform 0.2s ease;
+          z-index: 26;
+          padding: 5px;
+          line-height: 1;
+      }
+      .close-button:hover {
+          color: var(--dark-grey);
+          transform: rotate(90deg) scale(1.1);
+      }
+      
+      .settings-accordion {
+          margin-top: 20px;
+          border-top: 1px solid var(--border-color);
+          border-bottom: 1px solid var(--border-color);
+          animation: fadeInUp 0.5s ease-out 0.3s both;
+      }
+      .settings-accordion summary {
+          font-size: 1.15em;
+          font-weight: 500;
+          color: var(--primary-color-dark);
+          padding: 12px 0;
+          cursor: pointer;
+          list-style: none; 
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+      }
+      .settings-accordion summary::-webkit-details-marker { display: none; }
+      .settings-accordion summary::after {
+          content: '\f078';
+          font-family: 'Font Awesome 6 Free';
+          font-weight: 900;
+          font-size: 0.8em;
+          color: var(--medium-grey);
+          transition: transform 0.2s ease-in-out;
+      }
+      .settings-accordion[open] summary::after { transform: rotate(-180deg); }
+      
+      .language-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; padding-bottom: 15px; }
+      .lang-button { background-color: var(--light-grey); border: 1px solid transparent; border-radius: 8px; padding: 6px 5px; font-family: 'Bricolage Grotesque', sans-serif; font-size: 0.85em; font-weight: 500; cursor: pointer; text-align: center; transition: all 0.2s ease-out; color: var(--dark-grey); }
+      .lang-button:hover { background-color: #e0e0e0; transform: translateY(-1px); }
+      .lang-button.active { background-color: var(--active-color); color: white; font-weight: 600; border-color: var(--primary-color-dark); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+      
+      .user-profile-header { display: flex; align-items: center; margin-bottom: 5px; }
+      .edit-profile-btn { background: none; border: none; color: var(--dark-grey); font-size: 0.9em; cursor: pointer; padding: 6px; border-radius: 50%; transition: background-color 0.2s ease, color 0.2s ease; line-height: 1; margin-left: 8px; }
+      .edit-profile-btn:hover { background-color: var(--light-grey); color: var(--primary-color); }
+      .user-info-display p { margin: 8px 0; font-size: 0.9em; animation: none; color: var(--text-secondary);}
+      .user-info-display p > strong { font-weight: 600; margin-right: 5px; color: var(--dark-grey); }
+      #profile-edit-form { display: none; border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 10px; }
+      .user-slide-out.edit-mode .user-info-display,
+      .user-slide-out.edit-mode .user-profile-lower-content { display: none; }
+      .user-slide-out.edit-mode #profile-edit-form { display: block; animation: fadeIn 0.3s ease; }
+      
+      .logout-button { background: rgba(8, 169, 151, 0.1); border-radius: 20px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); border: 1px solid rgba(8, 169, 151, 0.15); padding: 10px 22px; font-size: 0.95em; font-weight: 500; color: var(--primary-color-dark); cursor: pointer; transition: all 0.25s ease; margin-top: 25px; width: fit-content; margin-left: auto; margin-right: auto; display: block; }
+      .logout-button:hover { background: rgba(8, 169, 151, 0.18); border-color: rgba(8, 169, 151, 0.25); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12); }
+      
+      .reminder-section { margin-top: 20px; text-align: left; padding: 12px 15px; background-color: rgba(240, 248, 245, 0.5); border-radius: 10px; border: 1px solid rgba(8, 169, 151, 0.1); animation: fadeIn 0.6s ease-out 0.3s both; }
+      .reminder-header { display: flex; justify-content: space-between; align-items: center; }
+      .add-reminder-btn { background-color: var(--active-color); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 1em; cursor: pointer; transition: all 0.2s ease; }
+      .add-reminder-btn:hover { transform: scale(1.1) rotate(90deg); background-color: var(--primary-color-dark); }
+      .reminder-list { list-style: none; padding: 0; margin: 10px 0 0 0; }
+      .reminder-list .list-placeholder { text-align: center; padding: 20px; color: var(--medium-grey); font-size: 0.9em; }
+      .reminder-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 10px; background-color: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); animation: scaleUp 0.4s ease-out forwards; position: relative; }
+      .reminder-item:last-child { margin-bottom: 0; }
+      .reminder-info { display: flex; align-items: center; }
+      .reminder-item i.fa-pills { font-size: 1.3em; color: var(--active-color); margin-right: 12px; flex-shrink: 0; }
+      .reminder-text { display: flex; flex-direction: column; }
+      .reminder-text p { animation: none; margin: 0; line-height: 1.3; }
+      .reminder-text .med-name { font-weight: 600; color: #444; font-size: 0.9em; }
+      .reminder-text .med-details { font-size: 0.8em; color: #777; }
+      .delete-reminder-btn { background: none; border: none; color: var(--medium-grey); cursor: pointer; font-size: 1.1em; padding: 5px; transition: color 0.2s ease, transform 0.2s ease; }
+      .delete-reminder-btn:hover { color: var(--danger-color); transform: scale(1.15); }
+      
+      .health-progress-section { margin-top: 20px; text-align: left; padding: 12px 15px; background-color: rgba(240, 248, 245, 0.5); border-radius: 10px; border: 1px solid rgba(8, 169, 151, 0.1); animation: fadeIn 0.6s ease-out 0.3s both; }
+      .progress-bar { height: 10px; background-color: #e8e8e8; border-radius: 5px; margin-top: 0; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.08); }
+      .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--active-color), #5fd4c6); border-radius: 5px; transition: width 1.2s cubic-bezier(0.65, 0, 0.35, 1); }
+      .day-labels { display: flex; justify-content: space-between; font-size: 0.7em; margin-top: 6px; color: #888; }
+      
+      .reminder-modal-overlay { position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.5); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+      .reminder-modal-overlay.active { opacity: 1; visibility: visible; }
+      .reminder-modal-content { background-color: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); width: 90%; max-width: 280px; transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+      .reminder-modal-overlay.active .reminder-modal-content { transform: scale(1); }
+      .reminder-modal-content h3 { margin-top: 0; margin-bottom: 15px; color: var(--primary-color); text-align: center; font-size: 1.2em; }
+      .reminder-modal-content .form-group { margin-bottom: 12px; }
+      .reminder-modal-content .form-group label { font-family: 'Bricolage Grotesque', sans-serif; font-size: 0.85em; }
+      .reminder-modal-content .form-group input, .reminder-modal-content .form-group select { border-radius: 8px; transition: border-color 0.2s ease, box-shadow 0.2s ease; width:100%; padding:9px 12px; font-size: 0.9em; border:1px solid var(--medium-grey)}
+      .reminder-modal-content .form-group input:focus, .reminder-modal-content .form-group select:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(8, 169, 151, 0.25); }
+      .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+      .modal-buttons button { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid transparent; font-family: 'Manrope', sans-serif; font-weight: 600; font-size: 0.9em; cursor: pointer; transition: all 0.2s ease; }
+      .modal-save-btn { background-color: var(--active-color); color: white; border-color: var(--primary-color-dark); }
+      .modal-save-btn:hover { background-color: var(--primary-color-dark); }
+      .modal-cancel-btn { background-color: #f1f1f1; color: var(--dark-grey); }
+      .modal-cancel-btn:hover { background-color: #e0e0e0; }
+
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes scaleUp { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+
+      
+    </style>
+</head>
+<body>
+    
+  <div class="smartphone">
+    <div class="screen-content">
+      <header class="app-header">
+        <a href="#" class="icon-btn" aria-label="Menu" id="menu-btn" data-title-key="menuBtnTitle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 6l16 0"/><path d="M4 12l16 0"/><path d="M4 18l16 0"/></svg></a>
+        <a href="#" class="icon-btn" aria-label="Profile" id="user-btn" data-title-key="userBtnTitle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855"/></svg></a>
+      </header>
+      
+      <main class="app-main">
+
+        {% if not result_text and not injury_text %}
+          
+          <div class="main-content-wrapper">
+              <h1 data-key="mainTitleAnalysis">Medical Analysis</h1>
+              <p data-key="mainSubtitleAnalysis">Upload a clear photo for an immediate AI-powered assessment or report summary.</p>
+
+              <form action="/scanning" method="POST" enctype="multipart/form-data" class="upload-form" id="analysis-form">
+                
+                <div class="form-group">
+                  <label for="action_type" data-key="formActionLabel">Choose Action</label>
+                  <select name="action_type" id="action_type" class="themed-select" required>
+                    <option value="" data-key="formActionOptionDefault">-- Please select an action --</option>
+                    <option value="injury_analysis" data-key="formActionOptionInjury">Injury Scan & First Aid Suggestion</option>
+                    <option value="medical_report" data-key="formActionOptionReport">X-ray / MRI / Prescription Report</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="patient_name" data-key="formPatientNameLabel">Patient Name (for PDF report)</label>
+                  <input type="text" name="patient_name" id="patient_name" class="themed-input" data-placeholder-key="formPatientNamePlaceholder">
+                </div>
+
+                <div class="form-group">
+                    <label for="image_file_input" data-key="formImageLabel">Upload Image</label>
+                    <input type="file" name="image_file" id="image_file_input" accept=".jpg,.jpeg,.png" required />
+                    <label for="image_file_input" class="upload-area" id="upload-label">
+                      <div class="upload-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 8h.01"></path><path d="M13 21h-7a3 3 0 0 1 -3 -3v-12a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v7"></path><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"></path><path d="M14 14l1 -1c.67 -.644 1.45 -.819 2.227 -.583"></path><path d="M19 16v6"></path><path d="M22 19l-3 -3l-3 3"></path></svg>
+                        <div class="upload-placeholder-text"><span data-key="uploadAreaText">Upload a Photo</span><small data-key="uploadAreaSubtext">Tap to select file</small></div>
+                      </div>
+                      <div class="image-preview-container" id="preview-container">
+                        <img src="" alt="Image Preview" id="image-preview" />
+                        <button type="button" class="change-file-btn" id="change-file" data-key="changeFileBtnText">Change</button>
+                      </div>
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn-analyze" id="analyze-btn">
+                  <span class="btn-text" data-key="analyzeBtnText">Analyze</span>
+                  <div class="btn-loader"></div>
+                </button>
+              </form>
+          </div>
+
+        {% else %}
+         
+          <div class="results-wrapper">
+              <h1 data-key="resultsTitle">Analysis Results</h1>
+              <p data-key="resultsSubtitle">Please find the generated report and suggestions below.</p>
+              
+              <div style="margin-top: calc(var(--spacing-unit) * 3);">
+                {% if injury_text %}
+                <div class="result-section">
+                  <h3 data-key="resultSectionInjury">Injury Description</h3>
+                  <pre>{{ injury_text }}</pre>
+                </div>
+                {% endif %}
+
+                {% if instructions_text %}
+                <div class="result-section">
+                  <h3 data-key="resultSectionInstructions">First Aid Instructions</h3>
+                  <pre>{{ instructions_text }}</pre>
+                </div>
+                {% endif %}
+
+                {% if link_text %}
+                <div class="result-section">
+                  <h3 data-key="resultSectionReference">Medical Reference</h3>
+                  <pre>{{ link_text }}</pre>
+                </div>
+                {% endif %}
+
+                {% if result_text %}
+                <div class="result-section">
+                  <h3 data-key="resultSectionAnalysis">Medical Image Analysis</h3>
+                  <pre>{{ result_text }}</pre>
+                </div>
+                {% endif %}
+                
+                {% if pdf_link %}
+                <div class="result-section">
+                    <h3 data-key="resultSectionDownload">Download PDF Report</h3>
+                    <a href="{{ pdf_link }}" download class="download-btn">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-file-download" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M14 3v4a1 1 0 0 0 1 1h4"></path><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"></path><path d="M12 11v6"></path><path d="M15 14l-3 3l-3 -3"></path></svg>
+                      <span data-key="downloadReportBtn">Download Report</span>
+                    </a>
+                </div>
+                {% endif %}
+
+                <a href="/scanning" class="btn-analyze" style="margin-top: 20px;">
+                    <span class="btn-text" data-key="newScanBtnText">Start New Scan</span>
+                </a>
+              </div>
+          </div>
+        {% endif %}
+      </main>
+
+      <footer class="app-footer">
+        
+        <a href="#" id="first-aid-btn" class="icon-btn" aria-label="First Aid Guide" data-title-key="footerTitleFirstAid"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 8v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"/><path d="M4 8m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M10 14h4"/><path d="M12 12v4"/></svg></a>
+        <a href="/scanning" class="icon-btn icon-btn--primary" aria-label="Scan Injury" data-title-key="footerTitleScan"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 7v-1a2 2 0 0 1 2 -2h1"/><path d="M4 17v1a2 2 0 0 0 2 2h1"/><path d="M16 4h1a2 2 0 0 1 2 2v1"/><path d="M16 20h1a2 2 0 0 0 2 -2v-1"/><path d="M5 12l14 0"/></svg></a>
+       
+        <a href="#" id="consult-btn" class="icon-btn" aria-label="Consult a Doctor" data-title-key="footerTitleConsult"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 4h-1a2 2 0 0 0 -2 2v3.5h0a5.5 5.5 0 0 0 11 0v-3.5a2 2 0 0 0 -2 -2h-1"/><path d="M8 15a6 6 0 1 0 12 0v-3"/><path d="M11 3v2"/><path d="M6 3v2"/><path d="M20 10m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/></svg></a>
+      </footer>
+
+      
+      <div class="chatbot-wrapper">
+        <div class="chatbot-fab" id="chatbot-fab" role="button" data-title-key="chatbotFabTitle" aria-label="Open AI Assistant">
+            <svg class="icon-chat" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8a8.5 8.5 0 0 1-7.6 4.7a8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8a8.5 8.5 0 0 1 4.7-7.6a8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            <svg class="icon-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </div>
+        <div class="chatbot-window" id="chatbot-window">
+          <div class="chatbot-header"><h3 data-key="chatbotTitle">AI Assistant</h3></div>
+          <div class="chatbot-messages" id="chatbot-messages"></div>
+          <form class="chatbot-input-form" id="chatbot-input-form">
+              <button type="button" id="chatbot-clear-btn" class="chatbot-tool-btn" aria-label="Clear Chat" data-title-key="chatbotClearTitle">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                      <path d="M3 21v-4a4 4 0 0 1 4 -4h5"></path>
+                      <path d="M21 3a16 16 0 0 0 -12.8 10.2"></path>
+                      <path d="M21 3a16 16 0 0 1 -10.2 12.8"></path>
+                      <path d="M10.6 9a9 9 0 0 1 4.4 4.4"></path>
+                  </svg>
+              </button>
+              <input type="text" id="chatbot-input" data-placeholder-key="chatbotPlaceholder" autocomplete="off">
+              <button id="chatbot-send-btn" type="submit" aria-label="Send Message" data-title-key="chatbotSendTitle">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              </button>
+          </form>
+        </div>
+      </div>
+      
+     
+      <div class="slide-out" id="menu-panel">
+        <button class="close-button">×</button>
+        <h2 data-key="menuHello">Hello User!</h2>
+        
+        <p class="location-display"><i class="fas fa-map-marker-alt"></i> Location: Rourkela, Odisha</p>
+
+        <details class="settings-accordion">
+            <summary data-key="settingsTitle">Settings</summary>
+            <div class="language-selector">
+                <button class="lang-button" data-lang="en">English</button>
+                <button class="lang-button" data-lang="hi">हिंदी</button>
+                <button class="lang-button" data-lang="bn">বাংলা</button>
+                <button class="lang-button" data-lang="te">తెలుగు</button>
+                <button class="lang-button" data-lang="mr">मराठी</button>
+                <button class="lang-button" data-lang="ta">தமிழ்</button>
+                <button class="lang-button" data-lang="ur">اردو</button>
+                <button class="lang-button" data-lang="gu">ગુજરાતી</button>
+                <button class="lang-button" data-lang="kn">ಕನ್ನಡ</button>
+                <button class="lang-button" data-lang="or">ଓଡ଼ିଆ</button>
+                <button class="lang-button" data-lang="ml">മലയാളം</button>
+                <button class="lang-button" data-lang="pa">ਪੰਜਾਬੀ</button>
+                <button class="lang-button" data-lang="as">অসমীয়া</button>
+            </div>
+        </details>
+        
+        <h3 data-key="menuHospitalsTitle">Nearby Hospitals</h3>
+        <ul class="hospital-list">
+        </ul>
+      </div>
+
+      <div class="user-slide-out" id="user-panel">
+          <button class="close-button">×</button>
+          <div class="user-profile-header">
+              <h2 data-key="profileTitle">User Profile</h2>
+              <button class="edit-profile-btn" data-title-key="editProfileTitle">
+                  <i class="fas fa-pencil-alt"></i>
+              </button>
+          </div>
+          
+          <div class="user-info-display">
+              <p><strong data-key="profileUserIdLabel">User Id:</strong> <span>JEEV3317</span></p>
+              <p><strong data-key="profileNameLabel">Name:</strong> <span id="display-name">Sita Kumari</span></p>
+              <p><strong data-key="profileAgeLabel">Age:</strong> <span id="display-age">22</span> <span data-key="yrUnit">yr</span></p>
+              <p><strong data-key="profileGenderLabel">Gender:</strong> <span id="display-gender">Female</span></p>
+              <p><strong data-key="profileHeightLabel">Height:</strong> <span id="display-height">173</span> <span data-key="cmUnit">cm</span></p>
+              <p><strong data-key="profileWeightLabel">Weight:</strong> <span id="display-weight">71</span> <span data-key="kgUnit">kg</span></p>
+          </div>
+          
+          <form id="profile-edit-form">
+              <div class="form-group">
+                  <label for="edit-name" data-key="profileNameLabel">Name</label>
+                  <input type="text" id="edit-name" required class="themed-input">
+              </div>
+              <div class="form-group">
+                  <label for="edit-age" data-key="profileAgeLabel">Age</label>
+                  <input type="number" id="edit-age" required class="themed-input">
+              </div>
+              <div class="form-group">
+                  <label for="edit-gender" data-key="profileGenderLabel">Gender</label>
+                  <select id="edit-gender" required class="themed-select">
+                      <option value="Female">Female</option>
+                      <option value="Male">Male</option>
+                      <option value="Other">Other</option>
+                  </select>
+              </div>
+              <div class="form-group">
+                  <label for="edit-height" data-key="profileHeightLabelFull">Height (cm)</label>
+                  <input type="number" id="edit-height" required class="themed-input">
+              </div>
+              <div class="form-group">
+                  <label for="edit-weight" data-key="profileWeightLabelFull">Weight (kg)</label>
+                  <input type="number" id="edit-weight" required class="themed-input">
+              </div>
+              <div class="modal-buttons">
+                  <button type="button" id="cancel-profile-edit" class="modal-cancel-btn" data-key="cancelBtn">Cancel</button>
+                  <button type="submit" class="modal-save-btn" data-key="saveBtn">Save</button>
+              </div>
+          </form>
+
+          <div class="user-profile-lower-content">
+              <div class="reminder-section">
+                  <div class="reminder-header">
+                      <h3 data-key="profileReminders" style="margin:0;">Reminders</h3>
+                      <button class="add-reminder-btn" title="Add Reminder">+</button>
+                  </div>
+                  <ul class="reminder-list"></ul>
+              </div>
+
+              <div class="health-progress-section">
+                  <h3 data-key="profileProgress">Your Health Progress (Week)</h3>
+                  <div class="progress-bar">
+                      <div class="progress-bar-fill" style="width: 65%;"></div>
+                  </div>
+                  <div class="day-labels">
+                      <span data-key="dayMon">Mon</span><span data-key="dayTue">Tue</span><span data-key="dayWed">Wed</span><span data-key="dayThu">Thu</span><span data-key="dayFri">Fri</span><span data-key="daySat">Sat</span><span data-key="daySun">Sun</span>
+                  </div>
+              </div>
+              <form method="post" action="{{ url_for('logout') }}">
+                  <button type="submit" class="logout-button" data-key="logoutButton">Logout</button>
+              </form>
+          </div>
+      </div>
+
+     
+      <div class="slide-out" id="first-aid-panel">
+        <button class="close-button">×</button>
+        <h2 data-key="footerTitleFirstAid">First Aid Guide</h2>
+        <p>This section is for the first aid guide. You can add content like common first aid procedures here.</p>
+        <h3>Example: Burns</h3>
+        <p>Immediately immerse in cool tap water or apply cold, wet compresses. Do this for about 10 minutes or until the pain subsides.</p>
+      </div>
+      
+      <div class="slide-out" id="consult-panel">
+          <button class="close-button">×</button>
+          <h2 data-key="footerTitleConsult">Consult a Doctor</h2>
+          <p>This section is for consultation information. You can list available doctors or provide a contact form.</p>
+          <h3>Dr. Anjali Sharma</h3>
+          <p>General Physician<br>Available: Mon-Fri, 9 AM - 5 PM</p>
+      </div>
+      
+    
+      <div class="reminder-modal-overlay">
+          <div class="reminder-modal-content">
+              <h3 data-key="addReminderTitle">Add Medicine Reminder</h3>
+              <form id="reminder-form">
+                  <div class="form-group">
+                      <label for="med-name" data-key="medNameLabel">Medicine Name</label>
+                      <input type="text" id="med-name" required>
+                  </div>
+                  <div class="form-group">
+                      <label for="med-times" data-key="medTimesLabel">Times (e.g., 08:00, 22:00)</label>
+                      <input type="text" id="med-times" placeholder="Comma separated, 24h format" required>
+                  </div>
+                  <div class="form-group">
+                      <label for="med-meal" data-key="medMealLabel">Meal</label>
+                      <select id="med-meal" required>
+                          <option value="After Food">After Food</option>
+                          <option value="Before Food">Before Food</option>
+                      </select>
+                  </div>
+                  <div class="modal-buttons">
+                      <button type="button" class="modal-cancel-btn" data-key="cancelBtn">Cancel</button>
+                      <button type="submit" class="modal-save-btn" data-key="saveBtn">Save</button>
+                  </div>
+              </form>
+          </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <script>
+   
+    const languageData = {
+        
+        menuBtnTitle: { en: 'Menu', hi: 'मेन्यू', bn: 'মেনু', te: 'మెను', mr: 'मेन्यू', ta: 'மெனு', ur: 'مینو', gu: 'મેનુ', kn: 'ಮೆನು', or: 'ମେନୁ', ml: 'മെനു', pa: 'ਮੀਨੂ', as: 'মেণু' },
+        userBtnTitle: { en: 'Profile', hi: 'प्रोफ़ाइल', bn: 'প্রোফাইল', te: 'ప్రొఫైల్', mr: 'प्रोफाइल', ta: 'சுயவிவரம்', ur: 'پروفائل', gu: 'પ્રોફાઇલ', kn: 'ಪ್ರೊಫೈಲ್', or: 'ପ୍ରୋଫାଇଲ୍', ml: 'പ്രൊഫൈൽ', pa: 'ਪ੍ਰੋਫਾਈਲ', as: 'প্ৰফাইল' },
+        mainTitleAnalysis: { en: 'Medical Analysis', hi: 'चिकित्सा विश्लेषण', bn: 'চিকিৎসা বিশ্লেষণ', te: 'వైద్య విశ్లేషణ', mr: 'वैद्यकीय विश्लेषण', ta: 'மருத்துவ பகுப்பாய்வு', ur: 'طبی تجزیہ', gu: 'તબીબી વિશ્લેષણ', kn: 'ವೈದ್ಯಕೀಯ ವಿಶ್ಲೇಷಣೆ', or: 'ଡାକ୍ତରୀ ବିଶ୍ଳେଷଣ', ml: 'മെഡിക്കൽ വിശകലനം', pa: 'ਮੈਡੀਕਲ ਵਿਸ਼ਲੇਸ਼ਣ', as: 'চিকিৎসা সম্বন্ধীয় বিশ্লেষণ' },
+        mainSubtitleAnalysis: { en: 'Upload a clear photo for an immediate AI-powered assessment or report summary.', hi: 'तत्काल एआई-संचालित मूल्यांकन या रिपोर्ट सारांश के लिए एक स्पष्ट फोटो अपलोड करें।', bn: 'অবিলম্বে AI-চালিত মূল্যায়ন বা প্রতিবেদনের সারাংশের জন্য একটি পরিষ্কার ছবি আপলোড করুন।', te: 'తక్షణ AI- ఆధారిత అంచనా లేదా నివేదిక సారాంశం కోసం స్పష్టమైన ఫోటోను అప్‌లోడ్ చేయండి.', mr: 'तत्काळ AI-चालित मूल्यांकन किंवा अहवाल सारांशासाठी एक स्पष्ट फोटो अपलोड करा.', ta: 'உடனடி AI-இயங்கும் மதிப்பீடு அல்லது அறிக்கை சுருக்கத்திற்கு தெளிவான புகைப்படத்தைப் பதிவேற்றவும்.', ur: 'فوری AI سے چلنے والی تشخیص یا رپورٹ کے خلاصے کے لیے ایک واضح تصویر اپ لوڈ کریں۔', gu: 'તાત્કાલિક AI-સંચાલિત મૂલ્યાંકન અથવા અહેવાલ સારાંશ માટે સ્પષ્ટ ફોટો અપલોડ કરો.', kn: 'ತಕ್ಷಣದ AI-ಚಾಲಿತ ಮೌಲ್ಯಮಾಪನ ಅಥವಾ ವರದಿ ಸಾರಾಂಶಕ್ಕಾಗಿ ಸ್ಪಷ್ಟವಾದ ಫೋಟೋವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ.', or: 'ଏକ ତତକ୍ଷଣାତ୍ AI- ଚାଳିତ ମୂଲ୍ୟାଙ୍କନ କିମ୍ବା ରିପୋର୍ଟ ସାରାଂଶ ପାଇଁ ଏକ ସ୍ପଷ୍ଟ ଫଟୋ ଅପଲୋଡ୍ କରନ୍ତୁ |', ml: 'ഉടനടി AI- പവർ ചെയ്യുന്ന വിലയിരുത്തലിനോ റിപ്പോർട്ട് സംഗ്രഹത്തിനോ വേണ്ടി വ്യക്തമായ ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യുക.', pa: 'ਤੁਰੰਤ AI-ਸੰਚਾਲਿਤ ਮੁਲਾਂਕਣ ਜਾਂ ਰਿਪੋਰਟ ਸੰਖੇਪ ਲਈ ਇੱਕ ਸਪਸ਼ਟ ਫੋਟੋ ਅੱਪਲੋਡ ਕਰੋ।', as: ' তৎকালীনভাৱে AI-চালিত মূল্যাঙ্কন বা প্ৰতিবেদনৰ সাৰাংশৰ বাবে এখন স্পষ্ট ফটো আপলোড কৰক।' },
+        formActionLabel: { en: 'Choose Action', hi: 'कार्रवाई चुनें', bn: 'অ্যাকশন বাছুন', te: 'చర్యను ఎంచుకోండి', mr: 'कृती निवडा', ta: 'செயலைத் தேர்ந்தெடுக்கவும்', ur: 'عمل منتخب کریں۔', gu: 'ક્રિયા પસંદ કરો', kn: 'ಕ್ರಿಯೆಯನ್ನು ಆರಿಸಿ', or: 'କାର୍ଯ୍ୟ ବାଛନ୍ତୁ |', ml: 'പ്രവൃത്തി തിരഞ്ഞെടുക്കുക', pa: 'ਕਾਰਵਾਈ ਚੁਣੋ', as: 'কাৰ্য্য বাছক' },
+        formActionOptionDefault: { en: '-- Please select an action --', hi: '-- कृपया एक कार्रवाई चुनें --', bn: '-- অনুগ্রহ করে একটি অ্যাকশন বাছুন --', te: '-- దయచేసి ఒక చర్యను ఎంచుకోండి --', mr: '-- कृपया एक कृती निवडा --', ta: '-- ஒரு செயலைத் தேர்ந்தெடுக்கவும் --', ur: '-- براہ کرم ایک عمل منتخب کریں۔ --', gu: '-- કૃપા કરીને એક ક્રિયા પસંદ કરો --', kn: '-- ದಯವಿಟ್ಟು ಕ್ರಿಯೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ --', or: '-- ଦୟାକରି ଏକ କାର୍ଯ୍ୟ ବାଛନ୍ତୁ --', ml: '-- ദയവായി ഒരു പ്രവൃത്തി തിരഞ്ഞെടുക്കുക --', pa: '-- ਕਿਰਪਾ ਕਰਕੇ ਕੋਈ ਕਾਰਵਾਈ ਚੁਣੋ --', as: '-- অনুগ্ৰহ কৰি এটা কাৰ্য্য বাছনি কৰক --' },
+        formActionOptionInjury: { en: 'Injury Scan & First Aid Suggestion', hi: 'चोट स्कैन और प्राथमिक उपचार सुझाव', bn: 'আঘাত স্ক্যান এবং প্রাথমিক চিকিৎসার পরামর্শ', te: 'గాయం స్కాన్ & ప్రథమ చికిత్స సూచన', mr: 'इजा स्कॅन आणि प्रथमोपचार सूचना', ta: 'காயம் ஸ்கேன் & முதலுதவி பரிந்துரை', ur: 'چوٹ کا اسکین اور ابتدائی طبی امداد کی تجویز', gu: 'ઈજા સ્કેન અને પ્રાથમિક સારવાર સૂચન', kn: 'ಗಾಯ ಸ್ಕ್ಯಾನ್ ಮತ್ತು ಪ್ರಥಮ ಚಿಕಿತ್ಸಾ ಸಲಹೆ', or: 'ଆଘାତ ସ୍କାନ୍ ଏବଂ ପ୍ରାଥମିକ ଚିକିତ୍ସା ପରାମର୍ଶ |', ml: 'പരിക്ക് സ്കാൻ & പ്രഥമശുശ്രൂഷാ നിർദ്ദേശം', pa: 'ਸੱਟ ਸਕੈਨ ਅਤੇ ਫਸਟ ਏਡ ਸੁਝਾਅ', as: 'আঘাতৰ স্কেন আৰু প্ৰাথমিক চিকিৎসাৰ পৰামৰ্শ' },
+        formActionOptionReport: { en: 'X-ray / MRI / Prescription Report', hi: 'एक्स-रे / एमआरआई / प्रिस्क्रिप्शन रिपोर्ट', bn: 'এক্স-রে / এমআরআই / প্রেসক্রিপশন রিপোর্ট', te: 'ఎక్స్-రే / ఎంఆర్‌ఐ / ప్రిస్క్రిప్షన్ నివేదిక', mr: 'एक्स-रे / एमआरआय / प्रिस्क्रिप्शन अहवाल', ta: 'எக்ஸ்-ரே / எம்ஆர்ஐ / மருந்து அறிக்கை', ur: 'ایکس رے / ایم آر آئی / نسخے کی رپورٹ', gu: 'એક્સ-રે / એમઆરઆઈ / પ્રિસ્ક્રિપ્શન રિપોર્ટ', kn: 'ಎಕ್ಸ್-ರೇ / ಎಂಆರ್‌ಐ / ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ವರದಿ', or: 'ଏକ୍ସ-ରେ / ଏମଆରଆଇ / ପ୍ରେସକ୍ରିପସନ୍ ରିପୋର୍ଟ |', ml: 'എക്സ്-റേ / എംആർഐ / കുറിപ്പടി റിപ്പോർട്ട്', pa: 'ਐਕਸ-ਰੇ / ਐਮਆਰਆਈ / ਨੁਸਖ਼ੇ ਦੀ ਰਿਪੋਰਟ', as: 'এক্স-ৰে / এমআৰআই / প্ৰেছক্ৰিপচন ৰিপোৰ্ট' },
+        formPatientNameLabel: { en: 'Patient Name (for PDF report)', hi: 'रोगी का नाम (पीडीएफ रिपोर्ट के लिए)', bn: 'রোগীর নাম (পিডিএফ রিপোর্টের জন্য)', te: 'రోగి పేరు (PDF నివేదిక కోసం)', mr: 'रुग्णाचे नाव (पीडीएफ अहवालासाठी)', ta: 'நோயாளி பெயர் (PDF அறிக்கைக்காக)', ur: 'مریض کا نام (پی ڈی ایف رپورٹ کے لیے)', gu: 'દર્દીનું નામ (પીડીએફ રિપોર્ટ માટે)', kn: 'ರೋಗಿಯ ಹೆಸರು (ಪಿಡಿಎಫ್ ವರದಿಗಾಗಿ)', or: 'ରୋଗୀର ନାମ (ପିଡିଏଫ୍ ରିପୋର୍ଟ ପାଇଁ)', ml: 'രോഗിയുടെ പേര് (പിഡിഎഫ് റിപ്പോർട്ടിനായി)', pa: 'ਮਰੀਜ਼ ਦਾ ਨਾਮ (ਪੀਡੀਐਫ ਰਿportor ਲਈ)', as: 'ৰোগীৰ নাম (পিডিএফ ৰিপোৰ্টৰ বাবে)' },
+        formPatientNamePlaceholder: { en: 'e.g., Jane Doe', hi: 'उदा., जेन डो', bn: 'उदा., জেন ডো', te: 'ఉదా., జేన్ డో', mr: 'उदा., जेन डो', ta: 'உதா., ஜேன் டோ', ur: 'مثلاً، جین ڈو', gu: 'દા.ત., જેન ડો', kn: 'ಉದಾ., ಜೇನ್ ಡೋ', or: 'ଯେପରିକି, ଜେన్ ଡୋ', ml: 'ഉദാ., ജെയ്ൻ ഡോ', pa: 'ਜਿਵੇਂ, ਜੇਨ ਡੋ', as: 'যেনে, জেন ডো' },
+        formImageLabel: { en: 'Upload Image', hi: 'छवि अपलोड करें', bn: 'ছবি আপলোড করুন', te: 'చిత్రాన్ని అప్‌లోడ్ చేయండి', mr: 'प्रतिमा अपलोड करा', ta: 'படத்தைப் பதிவேற்றவும்', ur: 'تصویر اپ لوڈ کریں۔', gu: 'છબી અપલોડ કરો', kn: 'ಚಿತ್ರವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ', or: 'ପ୍ରତିଛବି ଅପଲୋଡ୍ କରନ୍ତୁ |', ml: 'ചിത്രം അപ്‌ലോഡ് ചെയ്യുക', pa: 'ਚਿੱਤਰ ਅੱਪਲੋਡ ਕਰੋ', as: 'ছবি আপলোড কৰক' },
+        uploadAreaText: { en: 'Upload a Photo', hi: 'एक फोटो अपलोड करें', bn: 'একটি ছবি আপলোড করুন', te: 'ఒక ఫోటోను అప్‌లోడ్ చేయండి', mr: 'एक फोटो अपलोड करा', ta: 'ஒரு புகைப்படத்தைப் பதிવેற்றவும்', ur: 'ایک تصویر اپ لوڈ کریں۔', gu: 'એક ફોટો અપલોડ કરો', kn: 'ಫೋಟೋ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ', or: 'ଏକ ଫଟୋ ଅପଲୋଡ୍ କରନ୍ତୁ |', ml: 'ഒരു ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യുക', pa: 'ਇੱਕ ਫੋਟੋ ਅੱਪਲੋਡ ਕਰੋ', as: 'এখন ফটো আপলোড কৰক' },
+        uploadAreaSubtext: { en: 'Tap to select file', hi: 'फ़ाइल चुनने के लिए टैप करें', bn: 'ফাইল নির্বাচন করতে আলতো চাপুন', te: 'ఫైల్‌ను ఎంచుకోవడానికి నొక్కండి', mr: 'फाइल निवडण्यासाठी टॅप करा', ta: 'கோப்பைத் தேர்ந்தெடுக்க தட்டவும்', ur: 'فائل منتخب کرنے کے لیے تھپتھپائیں۔', gu: 'ફાઇલ પસંદ કરવા માટે ટેપ કરો', kn: 'ಫೈಲ್ ಆಯ್ಕೆ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ', or: 'ଫାଇଲ୍ ଚୟନ କରିବାକୁ ଟ୍ୟାପ୍ କରନ୍ତୁ |', ml: 'ഫയൽ തിരഞ്ഞെടുക്കാൻ ടാപ്പുചെയ്യുക', pa: 'ਫਾਈਲ ਚੁਣਨ ਲਈ ਟੈਪ ਕਰੋ', as: 'ফাইল নিৰ্বাচন কৰিবলৈ টেপ কৰক' },
+        changeFileBtnText: { en: 'Change', hi: 'बदलें', bn: 'পরিবর্তন', te: 'మార్పు', mr: 'बदला', ta: 'மாற்றம்', ur: 'تبدیل کریں', gu: 'બદલો', kn: 'ಬದಲಾಯಿಸಿ', or: 'ପରିବର୍ତ୍ତନ କରନ୍ତୁ |', ml: 'മാറ്റുക', pa: 'ਬਦਲੋ', as: 'সলনি কৰক' },
+        analyzeBtnText: { en: 'Analyze', hi: 'विश्लेषण करें', bn: 'বিশ্লেষণ করুন', te: 'విశ్లేషించండి', mr: 'विश्लेषण करा', ta: 'பகுப்பாய்வு', ur: 'تجزیہ کریں۔', gu: 'વિશ્લેષણ કરો', kn: 'ವಿಶ್ಲೇಷಿಸಿ', or: 'ବିଶ୍ଳେଷଣ କରନ୍ତୁ |', ml: 'വിശകലനം ചെയ്യുക', pa: 'ਵਿਸ਼ਲੇਸ਼ਣ ਕਰੋ', as: 'বিশ্লেষন কৰক' },
+        resultsTitle: { en: 'Analysis Results', hi: 'विश्लेषण के परिणाम', bn: 'বিশ্লেষণের ফলাফল', te: 'విశ్లేషణ ఫలితాలు', mr: 'विश्लेषण परिणाम', ta: 'பகுப்பாய்வு முடிவுகள்', ur: 'تجزیہ کے نتائج', gu: 'વિશ્લેષણ પરિણામો', kn: 'ವಿಶ್ಲೇಷಣೆಯ ಫಲಿತಾಂಶಗಳು', or: 'ବିଶ୍ଳେଷଣ ଫଳାଫଳ |', ml: 'വിശകലന ഫലങ്ങൾ', pa: 'ਵਿਸ਼ਲੇਸ਼ਣ ਦੇ ਨਤੀਜੇ', as: 'বিশ্লেষণৰ ফলাফল' },
+        resultsSubtitle: { en: 'Please find the generated report and suggestions below.', hi: 'कृपया नीचे दी गई रिपोर्ट और सुझाव देखें।', bn: 'অনুগ্রহ করে নিচে তৈরি করা প্রতিবেদন এবং পরামর্শ খুঁজুন।', te: 'దయచేసి దిగువన రూపొందించబడిన నివేదిక మరియు సూచనలను కనుగొనండి.', mr: 'कृपया खाली तयार केलेला अहवाल आणि सूचना शोधा.', ta: 'உருவாக்கப்பட்ட அறிக்கை மற்றும் பரிந்துரைகளை கீழே காணவும்.', ur: 'براہ کرم ذیل میں تیار کردہ رپورٹ اور تجاویز تلاش کریں۔', gu: 'કૃપા કરીને નીચે જનરેટ થયેલ અહેવાલ અને સૂચનો શોધો.', kn: 'ದಯವಿಟ್ಟು ಕೆಳಗೆ ರಚಿಸಲಾದ ವರದಿ ಮತ್ತು ಸಲಹೆಗಳನ್ನು ಹುಡುಕಿ.', or: 'ଦୟାକରି ନିମ୍ନରେ ସୃଷ୍ଟି ହୋଇଥିବା ରିପୋର୍ଟ ଏବଂ ପରାମର୍ଶଗୁଡିକ ଖୋଜନ୍ତୁ |', ml: 'താഴെ നൽകിയിട്ടുള്ള റിപ്പോർട്ടും നിർദ്ദേശങ്ങളും കണ്ടെത്തുക.', pa: 'ਕਿਰਪਾ ਕਰਕੇ ਹੇਠਾਂ ਦਿੱਤੀ ਰਿਪੋਰਟ ਅਤੇ ਸੁਝਾਅ ਲੱਭੋ।', as: 'অনুগ্ৰহ কৰি তলত দিয়া প্ৰতিবেদন আৰু পৰামৰ্שসমূহ চাওক।' },
+        resultSectionInjury: { en: 'Injury Description', hi: 'चोट का विवरण', bn: 'আঘাতের বর্ণনা', te: 'గాయం వివరణ', mr: 'इजा वर्णन', ta: 'காயத்தின் விளக்கம்', ur: 'چوٹ کی تفصیل', gu: 'ઈજાનું વર્ણન', kn: 'ಗಾಯದ ವಿವರಣೆ', or: 'ଆଘାତ ବର୍ଣ୍ଣନା |', ml: 'പരിക്കിന്റെ വിവരണം', pa: 'ਸੱਟ ਦਾ ਵੇਰਵਾ', as: 'আঘাতৰ বিৱৰণ' },
+        resultSectionInstructions: { en: 'First Aid Instructions', hi: 'प्राथमिक उपचार के निर्देश', bn: 'প্রাথমিক চিকিৎসার নির্দেশাবলী', te: 'ప్రథమ చికిత్స సూచనలు', mr: 'प्रथमोपचार सूचना', ta: 'முதலுதவி வழிமுறைகள்', ur: 'ابتدائی طبی امداد کی ہدایات', gu: 'પ્રાથમિક સારવારની સૂચનાઓ', kn: 'ಪ್ರಥಮ ಚಿಕಿತ್ಸಾ ಸೂಚನೆಗಳು', or: 'ପ୍ରାଥମିକ ଚିକିତ୍ସା ନିର୍ଦ୍ଦେଶାବଳୀ |', ml: 'പ്രഥമശുശ്രൂഷാ നിർദ്ദേശങ്ങൾ', pa: 'ਫਸਟ ਏਡ ਨਿਰਦੇਸ਼', as: 'প্ৰাথমিক চিকিৎসাৰ নিৰ্দেশনা' },
+        resultSectionReference: { en: 'Medical Reference', hi: 'चिकित्सीय संदर्भ', bn: 'চিকিৎসা সংক্রান্ত রেফারেন্স', te: 'వైద్య సూచన', mr: 'वैद्यकीय संदर्भ', ta: 'மருத்துவக் குறிப்பு', ur: 'طبی حوالہ', gu: 'તબીબી સંદર્ભ', kn: 'ವೈದ್ಯಕೀಯ ಉಲ್ಲೇಖ', or: 'ଡାକ୍ତରୀ ସନ୍ଦର୍ଭ |', ml: 'മെഡിക്കൽ റഫറൻസ്', pa: 'ਮੈਡੀਕਲ ਹਵਾਲਾ', as: 'চিকিৎসা সম্বন্ধীয় উল্লেখ' },
+        resultSectionAnalysis: { en: 'Medical Image Analysis', hi: 'चिकित्सीय छवि विश्लेषण', bn: 'মেডিকেল ইমেজ বিশ্লেষণ', te: 'మెడికల్ ఇమేజ్ విశ్లేషణ', mr: 'वैद्यकीय प्रतिमा विश्लेषण', ta: 'மருத்துவப் படப் பகுப்பாய்வு', ur: 'میڈیکل امیج کا تجزیہ', gu: 'મેડિકલ ઇમેજ વિશ્લેષણ', kn: 'ವೈದ್ಯಕೀಯ ಚಿತ್ರ ವಿಶ್ಲೇಷಣೆ', or: 'ଡାକ୍ତରୀ ପ୍ରତିଛବି ବିଶ୍ଳେଷଣ |', ml: 'മെഡിക്കൽ ഇമേജ് വിശകലനം', pa: 'ਮੈਡੀਕਲ ਚਿੱਤਰ ਵਿਸ਼ਲੇਸ਼ਣ', as: 'চিকিৎসা সম্বন্ধীয় ছবিৰ বিশ্লেষণ' },
+        resultSectionDownload: { en: 'Download PDF Report', hi: 'पीडीएफ रिपोर्ट डाउनलोड करें', bn: 'পিডিএফ রিপোর্ট ডাউনলোড করুন', te: 'PDF నివేదికను డౌన్‌లోడ్ చేయండి', mr: 'पीडीएफ अहवाल ডাউনলোড करा', ta: 'PDF அறிக்கையைப் பதிவிறக்கவும்', ur: 'پی ڈی ایف رپورٹ ڈاؤن لوڈ کریں۔', gu: 'પીડીએફ રિપોર્ટ ડાઉનલોડ કરો', kn: 'PDF ವರದಿಯನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ', or: 'PDF ରିପୋର୍ଟ ଡାଉନଲୋଡ୍ କରନ୍ତୁ |', ml: 'PDF റിപ്പോർട്ട് ഡൗൺലോഡ് ചെയ്യുക', pa: 'PDF ਰਿਪੋਰਟ ਡਾਊਨਲੋਡ ਕਰੋ', as: 'পিডিএফ ৰিপোৰ্ট ডাউনলোড কৰক' },
+        downloadReportBtn: { en: 'Download Report', hi: 'रिपोर्ट डाउनलोड करें', bn: 'রিপোর্ট ডাউনলোড করুন', te: 'నివేదికను డౌన్‌లోడ్ చేయండి', mr: 'अहवाल डाउनलोड करा', ta: 'அறிக்கையைப் பதிவிறக்கவும்', ur: 'رپورٹ ڈاؤن لوڈ کریں۔', gu: 'રિપોર્ટ ડાઉનલોડ કરો', kn: 'ವರದಿಯನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ', or: 'ରିପୋର୍ଟ ଡାଉନଲୋଡ୍ କରନ୍ତୁ |', ml: 'റിപ്പോർട്ട് ഡൗൺലോഡ് ചെയ്യുക', pa: 'ਰਿਪੋਰਟ ਡਾਊਨਲੋਡ ਕਰੋ', as: 'প্ৰতিবেদন ডাউনলোড কৰক' },
+        newScanBtnText: { en: 'Start New Scan', hi: 'नया स्कैन शुरू करें', bn: 'নতুন স্ক্যান শুরু করুন', te: 'కొత్త స్కాన్‌ను ప్రారంభించండి', mr: 'नवीन स्कॅन सुरू करा', ta: 'புதிய ஸ்கேனைத் தொடங்கவும்', ur: 'نیا اسکین شروع کریں۔', gu: 'નવું સ્કેન શરૂ કરો', kn: 'ಹೊಸ ಸ್ಕ್ಯಾನ್ ಪ್ರಾರಂಭಿಸಿ', or: 'ନୂତନ ସ୍କାନ୍ ଆରମ୍ଭ କରନ୍ତୁ |', ml: 'പുതിയ സ്കാൻ ആരംഭിക്കുക', pa: 'ਨਵਾਂ ਸਕੈਨ ਸ਼ੁਰੂ ਕਰੋ', as: 'নতুন স্কেন আৰম্ভ কৰক' },
+        footerTitleFirstAid: { en: 'First Aid Guide', hi: 'प्राथमिक उपचार गाइड', bn: 'প্রাথমিক চিকিৎসার গাইড', te: 'ప్రథమ చికిత్స గైడ్', mr: 'प्रथमोपचार मार्गदर्शक', ta: 'முதலுதவி வழிகாட்டி', ur: 'ابتدائی طبی امداد گائیڈ', gu: 'પ્રાથમિક સારવાર માર્ગદર્શિકਾ', kn: 'ಪ್ರಥಮ ಚಿಕಿತ್ಸಾ ಮಾರ್ಗದರ್ಶಿ', or: 'ପ୍ରାଥମିକ ଚିକିତ୍ସା ଗାଇଡ୍ |', ml: 'പ്രഥമശുശ്രൂഷാ ഗൈഡ്', pa: 'ਫਸਟ ਏਡ ਗਾਈਡ', as: 'প্ৰাথমিক চিকিৎসাৰ নিৰ্দেশনা' },
+        footerTitleScan: { en: 'Scan Injury', hi: 'चोट स्कैन करें', bn: 'আঘাত স্ক্যান করুন', te: 'గాయాన్ని స్కాన్ చేయండి', mr: 'इजा स्कॅन करा', ta: 'காயத்தை ஸ்கேன் செய்யவும்', ur: 'چوٹ کا اسکین کریں۔', gu: 'ઈજા સ્કેન કરો', kn: 'ಗಾಯವನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ', or: 'ଆଘାତ ସ୍କାନ୍ କରନ୍ତୁ |', ml: 'പരിക്ക് സ്കാൻ ചെയ്യുക', pa: 'ਸੱਟ ਸਕੈਨ ਕਰੋ', as: 'আঘাত স্কেন কৰক' },
+        footerTitleConsult: { en: 'Consult a Doctor', hi: 'डॉक्टर से परामर्श करें', bn: 'ডাক্তারের সাথে পরামর্শ করুন', te: 'డాక్టర్‌ను సంప్రదించండి', mr: 'डॉक्टरांचा सल्ला घ्या', ta: ' மருத்துவரை அணுகவும்', ur: 'ڈاکٹر سے مشورہ کریں۔', gu: 'ડૉક્ટરની સલાહ લો', kn: 'ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ', or: 'ଜଣେ ଡାକ୍ତରଙ୍କ ସହିତ ପରାମର୍ଶ କରନ୍ତୁ |', ml: 'ഒരു ഡോക്ടറെ സമീപിക്കുക', pa: 'ਡਾਕਟਰ ਨਾਲ ਸਲਾਹ ਕਰੋ', as: 'চিকিৎসকৰ পৰামৰ্শ লওক' },
+        chatbotFabTitle: { en: 'Open AI Assistant', hi: 'एआई सहायक खोलें', bn: 'এআই অ্যাসিস্ট্যান্ট খুলুন', te: 'AI సహాయకుడిని తెరవండి', mr: 'एआय सहाय्यक उघडा', ta: 'AI உதவியாளரைத் திறக்கவும்', ur: 'AI اسسٹنٹ کھولیں۔', gu: 'AI સહાયક ખોલો', kn: 'AI ಸಹಾಯಕವನ್ನು ತೆರೆಯಿರಿ', or: 'AI ସହାୟକ ଖୋଲନ୍ତୁ |', ml: 'AI അസിസ്റ്റന്റിനെ തുറക്കുക', pa: 'AI ਸਹਾਇਕ ਖੋਲ੍ਹੋ', as: 'AI সহায়ক খোলক' },
+        chatbotTitle: { en: 'AI Assistant', hi: 'एआई सहायक', bn: 'এআই অ্যাসিস্ট্যান্ট', te: 'AI సహాయకుడు', mr: 'एआय सहाय्यक', ta: 'AI உதவியாளர்', ur: 'AI اسسٹنٹ', gu: 'AI સહાયક', kn: 'AI ಸಹಾಯಕ', or: 'AI ସହାୟକ |', ml: 'AI അസിസ്റ്റന്റ്', pa: 'AI ਸਹਾਇਕ', as: 'AI সহায়ক' },
+        chatbotPlaceholder: { en: 'Ask anything...', hi: 'कुछ भी पूछें...', bn: 'কিছু জিজ্ঞাসা করুন...', te: 'ఏదైనా అడగండి...', mr: 'काहीही विचारा...', ta: 'எதையும் கேளுங்கள்...', ur: 'کچھ بھی پوچھیں...', gu: 'કંઈપણ પૂછો...', kn: 'ಏನಾದರೂ ಕೇಳಿ...', or: 'କିଛି ପଚାରନ୍ତୁ ...', ml: 'എന്തും ചോദിക്കാം...', pa: 'ਕੁਝ ਵੀ ਪੁੱਛੋ...', as: 'যিকোনো কথা সোধক...' },
+        chatbotClearTitle: { en: 'Clear Chat', hi: 'चैट साफ़ करें', bn: 'চ্যাট পরিষ্কার করুন', te: 'చాట్‌ను క్లియర్ చేయండి', mr: 'चॅट साफ करा', ta: 'அரட்டையை அழிக்கவும்', ur: 'چیٹ صاف کریں۔', gu: 'ચેટ સાફ કરો', kn: 'ಚಾಟ್ ಅನ್ನು ತೆರವುಗೊಳಿಸಿ', or: 'ଚାଟ୍ ସଫା କରନ୍ତୁ |', ml: 'ചാറ്റ് ക്ലിയർ ചെയ്യുക', pa: 'ਚੈਟ ਸਾਫ਼ ਕਰੋ', as: 'চ্যাট পৰিষ্কাৰ কৰক' },
+        chatbotSendTitle: { en: 'Send Message', hi: 'संदेश भेजें', bn: 'বার্তা পাঠান', te: 'సందేశం పంపండి', mr: 'संदेश पाठवा', ta: 'செய்தி அனுப்பு', ur: 'پیغام بھیجیں', gu: 'સંદેશ મોકલો', kn: 'ಸಂದೇಶ ಕಳುಹಿಸಿ', or: 'ସନ୍ଦେଶ ପଠାନ୍ତୁ |', ml: 'സന്ദേശം അയയ്ക്കുക', pa: 'ਸੁਨੇਹਾ ਭੇਜੋ', as: 'বাৰ্তা পঠিয়াওক' },
+        chatbotInitialGreeting: { en: 'Hello! How can I assist you today?', hi: 'नमस्ते! मैं आज आपकी कैसे सहायता कर सकता हूँ?', bn: 'নমস্কার! আমি আজ আপনাকে কিভাবে সাহায্য করতে পারি?', te: 'నమస్కారం! ఈ రోజు నేను మీకు ఎలా సహాయం చేయగలను?', mr: 'नमस्कार! मी आज तुम्हाला कशी मदत करू शकतो?', ta: 'வணக்கம்! இன்று நான் உங்களுக்கு எப்படி உதவ முடியும்?', ur: 'ہیلو! میں آج آپ کی کس طرح مدد کر سکتا ہوں؟', gu: 'નમસ્કાર! હું આજે તમને કેવી રીતે મદદ કરી શકું?', kn: 'ನಮಸ್ಕಾರ! ಇಂದು ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?', or: 'ନମସ୍କାର! ମୁଁ ଆଜି ଆପଣଙ୍କୁ କିପରି ସାହାଯ୍ୟ କରିପାରିବି?', ml: 'നമസ്കാരം! ഇന്ന് ഞാൻ നിങ്ങളെ എങ്ങനെ സഹായിക്കും?', pa: 'ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਅੱਜ ਮੈਂ ਤੁਹਾਡੀ ਕਿਵੇਂ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ?', as: 'নমস্কাৰ! মই আজি আপোনাক কেনেদৰে সহায় কৰিব পাৰোঁ?' },
+        mainHeading: { en: 'Micro Clinic', hi: 'माइक्रो क्लिनिक', bn: 'মাইক্রো ক্লিনিক', te: 'మైక్రో క్లినిక్', mr: 'मायक्रो क्लिनिक', ta: 'மைக்ரோ கிளினிக்', ur: 'مائیکرو کلینک', gu: 'માઇક્રો ક્લિનિક', kn: 'ಮೈಕ್ರೋ ಕ್ಲಿನಿಕ್', or: 'ମାଇକ୍ରୋ କ୍ଲିନିକ୍', ml: 'മൈക്രോ ക്ലിനിക്ക്', pa: 'ਮਾਈਕ੍ਰੋ ਕਲੀਨਿਕ', as: 'মাইক্ৰ’ ক্লিনিক' },
+        menuHello: { en: 'Hello User!', hi: 'नमस्ते उपयोगकर्ता!', bn: 'নমস্কার ব্যবহারকারী!', te: 'హలో యూజర్!', mr: 'नमस्कार यूजर!', ta: 'வணக்கம் பயனரே!', ur: 'ہیلو صارف!', gu: 'નમસ્તે વપરાશકર્તા!', kn: 'ನಮಸ್ಕಾರ ಬಳಕೆದಾರ!', or: 'ନମସ୍କାର ବ୍ୟବହାରକାରୀ!', ml: 'ഹലോ യൂസർ!', pa: 'ਸਤ ਸ੍ਰੀ ਅਕਾਲ ਯੂਜ਼ਰ!', as: 'নমস্কাৰ ব্যৱহাৰকাৰী!' },
+        settingsTitle: { en: 'Settings', hi: 'सेटिंग्स', bn: 'সেটিংস', te: 'సెట్టింగ్‌లు', mr: 'सेटिंग्ज', ta: 'அமைப்புகள்', ur: 'سیٹنگز', gu: 'સેટિંગ્સ', kn: 'ಸಂಯೋਜನೆಗಳು', or: 'ସେଟିଂସମୂହ', ml: 'ക്രമീകരണങ്ങൾ', pa: 'ਸੈਟਿੰਗਾਂ', as: 'ছেটিংসমূহ' },
+        menuHospitalsTitle: { en: 'Nearby Hospitals', hi: 'आस-पास के अस्पताल', bn: 'काছাকাছি হাসপাতাল', te: 'సమీపంలోని ఆసుపత్రులు', mr: 'जवळपासची रुग्णालये', ta: 'அருகிலுள்ள மருத்துவமனைகள்', ur: 'قریبی ہسپتال', gu: 'નજીકની હોસ્પિટલો', kn: 'ಹತ್ತಿರದ ಆಸ್ಪತ್ರೆಗಳು', or: 'ନିକଟବର୍ତ୍ତୀ ହସ୍ପିଟାଲଗୁଡିକ', ml: 'സമീപത്തുള്ള ആശുപത്രികൾ', pa: 'ਨੇੜਲੇ ਹਸਪਤਾਲ', as: 'ওচৰৰ চিকিৎসালয়' },
+        profileTitle: { en: 'User Profile', hi: 'उपयोगकर्ता प्रोफ़ाइल', bn: 'ব্যবহারকারী প্রোফাইল', te: 'యూజర్ ప్రొఫైల్', mr: 'वापरकर्ता प्रोफाइल', ta: 'பயனர் சுயவிவரம்', ur: 'صارف پروفائل', gu: 'વપરાશકર્તા પ્રોફાઇલ', kn: 'ಬಳಕೆದಾರರ ಪ್ರೊಫೈಲ್', or: 'ବ୍ୟବହାରକାରୀ ପ୍ରୋଫାଇଲ୍', ml: 'ഉപയോക്തൃ പ്രൊഫൈൽ', pa: 'ਉਪਭੋਗਤਾ ਪ੍ਰੋਫਾਈਲ', as: 'ব্যৱহাৰকাৰীৰ প্ৰফাইল' },
+        editProfileTitle: { en: 'Edit Profile', hi: 'प्रोफ़ाइल संपादित करें', bn: 'প্রোফাইল সম্পাদনা করুন', te: 'ప్రొఫైల్ సవరించండి', mr: 'प्रोफाइल संपादित करा', ta: 'சுயவிவரத்தைத் திருத்து', ur: 'پروفائل میں ترمیم کریں', gu: 'પ્રોફાઇલ સંપાદિત કરો', kn: 'ಪ್ರೊಫೈಲ್ ಸಂಪಾದಿಸಿ', or: 'ପ୍ରୋଫାଇଲ୍ ସମ୍ପାଦନ କରନ୍ତୁ |', ml: 'പ്രൊഫൈൽ എഡിറ്റുചെയ്യുക', pa: 'ਪ੍ਰੋਫਾਈਲ ਸੰਪਾਦਿਤ ਕਰੋ', as: 'প্ৰফাইল সম্পাদনা কৰক' },
+        profileUserIdLabel: { en: 'User Id:', hi: 'उपयोगकर्ता आईडी:', bn: 'ব্যবহারকারী আইডি:', te: 'యూజర్ ఐడి:', mr: 'युझर आयडी:', ta: 'பயனர் ஐடி:', ur: 'صارف شناخت:', gu: 'વપરાશકર્તા ID:', kn: 'ಬಳಕೆದಾರರ ID:', or: 'ଉପଭୋକ୍ତା ଆଇଡି:', ml: 'ഉപയോക്തൃ ഐഡി:', pa: 'ਯੂਜ਼ਰ ਆਈਡੀ:', as: 'ব্যৱহাৰকাৰী আইডি:' },
+        profileNameLabel: { en: 'Name:', hi: 'नाम:', bn: 'নাম:', te: 'పేరు:', mr: 'नाव:', ta: 'பெயர்:', ur: 'نام:', gu: 'નામ:', kn: 'ಹೆಸರು:', or: 'ନାମ:', ml: 'പേര്:', pa: 'ਨਾਮ:', as: 'নাম:' },
+        profileAgeLabel: { en: 'Age:', hi: 'आयु:', bn: 'বয়স:', te: 'వయస్సు:', mr: 'वय:', ta: 'வயது:', ur: 'عمر:', gu: 'ઉંમર:', kn: 'ವಯಸ್ಸು:', or: 'ବୟସ:', ml: 'വയസ്സ്:', pa: 'ਉਮਰ:', as: 'বয়স:' },
+        yrUnit: { en: 'yr', hi: 'वर्ष', bn: 'বছর', te: 'సం', mr: 'वर्षे', ta: 'ஆண்டு', ur: 'سال', gu: 'વર્ષ', kn: 'ವರ್ಷ', or: 'ବର୍ଷ', ml: 'വർഷം', pa: 'ਸਾਲ', as: 'বছৰ' },
+        profileGenderLabel: { en: 'Gender:', hi: 'लिंग:', bn: 'লিঙ্গ:', te: 'లింగం:', mr: 'लिंग:', ta: 'பாலினம்:', ur: 'جنس:', gu: 'જાતિ:', kn: 'ಲಿಂಗ:', or: 'ଲିଙ୍ଗ:', ml: 'ലിംഗം', pa: 'ਲਿੰਗ:', as: 'লিংগ:' },
+        profileHeightLabel: { en: 'Height:', hi: 'ऊंचाई:', bn: 'উচ্চতা:', te: 'ఎత్తు:', mr: 'उंची:', ta: 'உயரம்:', ur: 'قد:', gu: 'ઊંચાઈ:', kn: 'ಎತ್ತರ:', or: 'ଉଚ୍ଚତା:', ml: 'ഉയരം:', pa: 'ਕੱਦ:', as: 'উচ্চতা:' },
+        profileHeightLabelFull: { en: 'Height (cm)', hi: 'ऊंचाई (सेमी)', bn: 'উচ্চতা (সেমি)', te: 'ఎత్తు (సెం.మీ.)', mr: 'उंची (सेमी)', ta: 'உயரம் (செ.மீ.)', ur: 'قد (سینٹی میٹر)', gu: 'ઊંચાઈ (સેમી)', kn: 'ಎತ್ತರ (ಸెం)', or: 'ଉଚ୍ଚତା (ସେମି)', ml: 'ഉയരം (സെ.മീ)', pa: 'ਕੱਦ (ਸੈਮੀ)', as: 'উচ্চতা (ছে.মি.)' },
+        cmUnit: { en: 'cm', hi: 'सेमी', bn: 'সেমি', te: 'సెం.మీ.', mr: 'सेमी', ta: 'செ.மீ.', ur: 'سینٹی میٹر', gu: 'સેમી', kn: 'ಸೆಂ', or: 'ସେମି', ml: 'സെ.മീ', pa: 'ਸੈਮੀ', as: 'ছে.মি.' },
+        profileWeightLabel: { en: 'Weight:', hi: 'वजन:', bn: 'ওজন:', te: 'బరువు:', mr: 'वजन:', ta: 'எடை:', ur: 'وزن:', gu: 'વજન:', kn: 'ತೂಕ:', or: 'ଓଜନ:', ml: 'ഭാരം:', pa: 'ਭਾਰ:', as: 'ওজন:' },
+        profileWeightLabelFull: { en: 'Weight (kg)', hi: 'वजन (किग्रा)', bn: 'ওজন (কেজি)', te: 'బరువు (కిలోలు)', mr: 'वजन (किलो)', ta: 'எடை (கிலோ)', ur: 'وزن (کلوگرام)', gu: 'વજન (કિલો)', kn: 'ತೂಕ (ಕೆಜಿ)', or: 'ଓଜନ (କିଗ୍ରା)', ml: 'ഭാരം (കിലോ)', pa: 'ਭਾਰ (ਕਿਲੋ)', as: 'ওজন (কিলোগ্ৰাম)' },
+        kgUnit: { en: 'kg', hi: 'किग्रा', bn: 'কেজি', te: 'కిలోలు', mr: 'किलो', ta: 'கிலோ', ur: 'کلوگرام', gu: 'કિલો', kn: 'ಕೆಜಿ', or: 'କିଗ୍ରା', ml: 'കിലോ', pa: 'ਕਿਲੋ', as: 'কিলোগ্ৰাম' },
+        profileReminders: { en: 'Reminders', hi: 'रिमाइंडर', bn: 'অনুস্মারক', te: 'రిమైండర్‌లు', mr: 'स्मरणपत्रे', ta: 'நினைவூட்டல்கள்', ur: 'یاد دہانیاں', gu: 'રીમાઇન્ડર્સ', kn: 'ಜ್ಞಾಪನೆಗಳು', or: 'ସ୍ମାରକପତ୍ର', ml: 'ഓർമ്മപ്പെടുത്തലുകൾ', pa: 'ਰੀਮਾਈਂਡਰ', as: 'স্মাৰক' },
+        profileProgress: { en: 'Your Health Progress (Week)', hi: 'आपकी स्वास्थ्य प्रगति (सप्ताह)', bn: 'আপনার স্বাস্থ্য অগ্রগতি (সপ্তাহ)', te: 'మీ ఆరోగ్య పురోగతి (వారం)', mr: 'तुमची आरोग्य प्रगती (आठवडा)', ta: 'உங்கள் சுகாதார முன்னேற்றம் (வாரம்)', ur: 'آپ کی صحت کی پیشرفت (ہفتہ)', gu: 'તમારી આરોગ્ય પ્રગતિ (અઠવાડિયું)', kn: 'ನಿಮ್ಮ ಆರೋಗ್ಯ ಪ್ರಗತಿ (ವಾರ)', or: 'ଆପଣଙ୍କ ସ୍ୱାସ୍ଥ୍ୟ ପ୍ରଗତି (ସପ୍ତାହ)', ml: 'നിങ്ങളുടെ ആരോഗ്യ പുരോഗതി (ആഴ്ച)', pa: 'ਤੁਹਾਡੀ ਸਿਹਤ ਦੀ ਪ੍ਰਗਤੀ (ਹਫ਼ਤਾ)', as: 'আপোনাৰ স্বাস্থ্যৰ প্ৰগতি (সপ্তাহ)' },
+        logoutButton: { en: 'Logout', hi: 'लॉग आउट', bn: 'লগআউট', te: 'లాగ్ అవుట్', mr: 'लॉग আউট', ta: 'வெளியேறு', ur: 'لاگ آوٹ', gu: 'લૉગ આઉટ', kn: 'ಲಾಗ್ ಔಟ್', or: 'ଲଗଆଉଟ୍', ml: 'ലോഗ്ഔട്ട്', pa: 'ਲਾਗ ਆਊਟ', as: 'লগ আউট' },
+        dayMon: { en: 'Mon', hi: 'सोम' }, dayTue: { en: 'Tue', hi: 'मंगल' }, dayWed: { en: 'Wed', hi: 'बुध' }, dayThu: { en: 'Thu', hi: 'गुरु' }, dayFri: { en: 'Fri', hi: 'शुक्र' }, daySat: { en: 'Sat', hi: 'शनि' }, daySun: { en: 'Sun', hi: 'रवि' },
+        addReminderTitle: {en: 'Add Medicine Reminder', hi: 'दवा रिमाइंडर जोड़ें', bn: 'ঔষধ রিমাইন্ডার যোগ করুন', te: 'మందుల రిమైండర్‌ను జోడించండి', mr: 'औषध रिमाइंडर జోడించండి', ta: 'மருந்து நினைவூட்டலைச் சேர்க்கவும்', ur: 'دوا کی یاد دہانی شامل کریں۔', gu: 'દવા રીમાઇન્ડર ઉમેરો', kn: 'ಔಷಧಿ ಜ್ಞಾಪನೆಯನ್ನು ಸೇರಿಸಿ', or: 'औषध ସ୍ମାରକ ଯୋଗ କରନ୍ତୁ |', ml: 'മരുന്ന് ഓർമ്മപ്പെടുത്തൽ ചേർക്കുക', pa: 'ਦਵਾਈ ਰੀਮਾਈਂਡਰ ਸ਼ਾਮਲ ਕਰੋ', as: 'மருந்து স্মৃতি যোগ কৰক' },
+        medNameLabel: {en: 'Medicine Name', hi: 'दवा का नाम', bn: 'ঔষধের নাম', te: 'మందు పేరు', mr: 'औषधाचे नाव', ta: 'மருந்தின் பெயர்', ur: 'دوا کا نام', gu: 'દવાનું નામ', kn: 'ಔಷಧದ ಹೆಸರು', or: 'औषध ନାମ |', ml: 'മരുന്നിന്റെ പേര്', pa: 'ਦਵਾਈ ਦਾ ਨਾਮ', as: 'ঔষধৰ নাম' },
+        medTimesLabel: {en: 'Times (e.g., 08:00, 22:00)', hi: 'समय (उदा. 08:00, 22:00)', bn: 'সময় (উদাঃ 08:00, 22:00)', te: 'సమయాలు (ఉదా., 08:00, 22:00)', mr: 'वेळा (उदा. ०८:००, २२:००)', ta: 'நேரங்கள் (எ.கா., 08:00, 22:00)', ur: 'اوقات (مثلاً، 08:00، 22:00)', gu: 'સમય (દા.ત., 08:00, 22:00)', kn: 'ಸಮಯಗಳು (ಉದಾ., 08:00, 22:00)', or: 'ସମୟ (ଉଦାହରଣ ସ୍ୱରୂପ, 08:00, 22:00)', ml: 'സമയം (ഉദാ., 08:00, 22:00)', pa: 'ਸਮਾਂ (ਉਦਾਹਰਨ, 08:00, 22:00)', as: 'সময় (যেনে, ০৮:০০, ২২:০০)' },
+        medMealLabel: {en: 'Meal', hi: 'भोजन', bn: 'খাবার', te: 'భోజనం', mr: 'जेवण', ta: 'உணவு', ur: 'کھانا', gu: 'ભોજન', kn: 'ಊಟ', or: 'ଖାଦ୍ୟ', ml: 'ഭക്ഷണം', pa: 'ਭੋਜਨ', as: 'আহাৰ' },
+        cancelBtn: {en: 'Cancel', hi: 'रद्द करें', bn: 'বাতিল', te: 'రద్దు చేయి', mr: 'रद्द करा', ta: 'ரத்துசெய்', ur: 'منسوخ کریں۔', gu: 'રદ કરો', kn: 'ರದ್ದುಗೊಳಿಸಿ', or: 'ବାତିଲ କରନ୍ତୁ', ml: 'റദ്ദാക്കുക', pa: 'ਰੱਦ ਕਰੋ', as: 'বাতিল কৰক' },
+        saveBtn: {en: 'Save', hi: 'सहेजें', bn: 'সংরক্ষণ', te: 'సేవ్ చేయి', mr: 'जतन करा', ta: 'சேமி', ur: 'محفوظ کریں۔', gu: 'સાચવો', kn: 'ಉಳಿಸಿ', or: 'ସଞ୍ଚୟ କରନ୍ତୁ', ml: 'സേവ് ചെയ്യുക', pa: 'ਸੇਵ ਕਰੋ', as: 'সংৰক্ষণ কৰক' },
+    };
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      const screenContent = document.querySelector('.screen-content');
+      const analysisForm = document.getElementById('analysis-form');
+      const fileInput = document.getElementById('image_file_input');
+      const uploadLabel = document.getElementById('upload-label');
+      const imagePreview = document.getElementById('image-preview');
+      const previewContainer = document.getElementById('preview-container');
+      const changeFileBtn = document.getElementById('change-file');
+      const analyzeBtn = document.getElementById('analyze-btn');
+      
+      const menuBtn = document.querySelector('#menu-btn');
+      const userBtn = document.querySelector('#user-btn');
+      const slideOut = document.querySelector('#menu-panel');
+      const userSlideOut = document.querySelector('#user-panel');
+      const closeButtons = document.querySelectorAll('.close-button');
+
+    
+      const firstAidBtn = document.querySelector('#first-aid-btn');
+      const consultBtn = document.querySelector('#consult-btn');
+      const firstAidPanel = document.querySelector('#first-aid-panel');
+      const consultPanel = document.querySelector('#consult-panel');
+      
+      const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+
+      const locationDisplay = document.querySelector('.location-display');
+      const hospitalList = document.querySelector('.slide-out .hospital-list');
+      let hasFetchedLocation = false;
+      
+      const reminderModal = document.querySelector('.reminder-modal-overlay');
+      const addReminderBtn = document.querySelector('.add-reminder-btn');
+      const cancelReminderBtn = reminderModal.querySelector('.modal-cancel-btn');
+      const reminderForm = document.getElementById('reminder-form');
+      const reminderList = document.querySelector('.user-slide-out .reminder-list');
+      let reminders = JSON.parse(localStorage.getItem('microClinicReminders')) || [];
+      
+      const userSlideOutPanel = document.querySelector('.user-slide-out');
+      const editProfileBtn = document.querySelector('.edit-profile-btn');
+      const profileEditForm = document.querySelector('#profile-edit-form');
+      const cancelProfileEditBtn = document.querySelector('#cancel-profile-edit');
+      const displayName = document.querySelector('#display-name');
+      const displayAge = document.querySelector('#display-age');
+      const displayGender = document.querySelector('#display-gender');
+      const displayHeight = document.querySelector('#display-height');
+      const displayWeight = document.querySelector('#display-weight');
+      const editName = document.querySelector('#edit-name');
+      const editAge = document.querySelector('#edit-age');
+      const editGender = document.querySelector('#edit-gender');
+      const editHeight = document.querySelector('#edit-height');
+      const editWeight = document.querySelector('#edit-weight');
+
+      if (analysisForm) {
+        fileInput.addEventListener('change', () => {
+          const file = fileInput.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              imagePreview.src = e.target.result;
+              uploadLabel.classList.add('file-selected');
+              uploadLabel.style.borderColor = 'var(--primary-color)';
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+
+        changeFileBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          fileInput.value = '';
+          uploadLabel.classList.remove('file-selected');
+          imagePreview.src = "";
+          uploadLabel.style.borderColor = 'var(--border-color)';
+          fileInput.click();
+        });
+        
+        analysisForm.addEventListener('submit', (e) => {
+          if (!fileInput.files.length) {
+              e.preventDefault();
+              console.log("No file selected");
+              return;
+          }
+          if (analyzeBtn) {
+            analyzeBtn.classList.add('loading');
+            analyzeBtn.disabled = true;
+          }
+          if (previewContainer) {
+            previewContainer.classList.add('scanning');
+          }
+        });
+      }
+
+      const chatbotFab = document.getElementById('chatbot-fab');
+      const chatbotWindow = document.getElementById('chatbot-window');
+      const chatbotMessages = document.getElementById('chatbot-messages');
+      const chatbotInputForm = document.getElementById('chatbot-input-form');
+      const chatbotInput = document.getElementById('chatbot-input');
+      const chatbotClearBtn = document.getElementById('chatbot-clear-btn');
+
+      const toggleChatbot = () => {
+        screenContent.classList.toggle('chatbot-is-open');
+        chatbotWindow.classList.toggle('open');
+        chatbotFab.classList.toggle('open');
+      };
+
+      const addMessage = (text, sender) => {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', `${sender}-message`);
+        const messageContent = document.createElement('div');
+        messageContent.classList.add('message-content');
+        messageContent.textContent = text;
+        messageElement.appendChild(messageContent);
+        chatbotMessages.appendChild(messageElement);
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      };
+
+      const showTypingIndicator = () => {
+        const indicatorWrapper = document.createElement('div');
+        indicatorWrapper.classList.add('message', 'ai-message', 'typing-indicator-wrapper');
+        indicatorWrapper.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
+        chatbotMessages.appendChild(indicatorWrapper);
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      };
+
+      const hideTypingIndicator = () => {
+        const typingIndicator = chatbotMessages.querySelector('.typing-indicator-wrapper');
+        if (typingIndicator) typingIndicator.remove();
+      };
+      
+      chatbotInputForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userText = chatbotInput.value.trim();
+        if (userText === '') return;
+        addMessage(userText, 'user');
+        chatbotInput.value = '';
+        showTypingIndicator();
+        try {
+          const response = await fetch('/get_chatbot_response', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', },
+            body: new URLSearchParams({ message: userText })
+          });
+          const data = await response.json();
+          addMessage(data.response, 'ai');
+        } catch (error) {
+          addMessage("⚠️ Failed to connect to AI: " + error.message, 'ai');
+        } finally {
+          hideTypingIndicator();
+        }
+      });
+      
+      chatbotFab.addEventListener('click', toggleChatbot);
+
+      chatbotClearBtn.addEventListener('click', () => {
+        chatbotMessages.innerHTML = '';
+        const greeting = languageData.chatbotInitialGreeting[localStorage.getItem('preferredLanguage') || 'en'];
+        addMessage(greeting, 'ai');
+      });
+      
+    
+      function changeLanguage(lang) {
+          if (!lang || !languageData) return;
+          document.documentElement.lang = lang;
+          
+          document.querySelectorAll('[data-key]').forEach(elem => {
+              const key = elem.dataset.key;
+              const translation = languageData[key]?.[lang];
+              if (translation !== undefined) elem.textContent = translation;
+          });
+
+          document.querySelectorAll('[data-title-key]').forEach(elem => {
+              const key = elem.dataset.titleKey;
+              const translation = languageData[key]?.[lang];
+              if (translation !== undefined) elem.title = translation;
+          });
+          
+          document.querySelectorAll('[data-placeholder-key]').forEach(elem => {
+              const key = elem.dataset.placeholderKey;
+              const translation = languageData[key]?.[lang];
+              if (translation !== undefined) elem.placeholder = translation;
+          });
+
+          if (chatbotMessages.children.length <= 1) { 
+              chatbotMessages.innerHTML = '';
+              const initialGreeting = languageData.chatbotInitialGreeting[lang] || languageData.chatbotInitialGreeting.en;
+              addMessage(initialGreeting, 'ai');
+          }
+          
+          document.querySelectorAll('.lang-button').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
+          localStorage.setItem('preferredLanguage', lang);
+      }
+      
+      const languageSelector = document.querySelector('.language-selector');
+      if(languageSelector) {
+        languageSelector.addEventListener('click', (event) => {
+            const button = event.target.closest('.lang-button');
+            if (button) changeLanguage(button.dataset.lang);
+        });
+      }
+      
+      function closeSlide(panelElement) {
+          if (!panelElement || !panelElement.classList.contains('active')) return;
+          panelElement.classList.remove('active');
+          if(panelElement.classList.contains('user-slide-out') && panelElement.classList.contains('edit-mode')){ exitEditMode(); }
+          if (panelElement.classList.contains('slide-out')) screenContent.classList.remove('slide-active');
+          else if (panelElement.classList.contains('user-slide-out')) screenContent.classList.remove('user-slide-active');
+      }
+
+    
+      function closeAllSlides(...panelsToKeepOpen) {
+          [slideOut, userSlideOut, firstAidPanel, consultPanel].forEach(panel => {
+              if (!panelsToKeepOpen.includes(panel)) closeSlide(panel);
+          });
+      }
+      
+      menuBtn.addEventListener('click', (e) => {
+          e.preventDefault(); e.stopPropagation();
+          closeAllSlides(slideOut);
+          slideOut.classList.add('active');
+          screenContent.classList.add('slide-active');
+          if (!hasFetchedLocation) handleGeolocation();
+      });
+
+      userBtn.addEventListener('click', (e) => {
+          e.preventDefault(); e.stopPropagation();
+          closeAllSlides(userSlideOut);
+          userSlideOut.classList.add('active');
+          screenContent.classList.add('user-slide-active');
+      });
+      
+      
+      firstAidBtn.addEventListener('click', (e) => {
+          e.preventDefault(); e.stopPropagation();
+          closeAllSlides(firstAidPanel);
+          firstAidPanel.classList.add('active');
+          screenContent.classList.add('slide-active'); 
+      });
+
+      consultBtn.addEventListener('click', (e) => {
+          e.preventDefault(); e.stopPropagation();
+          closeAllSlides(consultPanel);
+          consultPanel.classList.add('active');
+          screenContent.classList.add('slide-active'); 
+      });
+
+      closeButtons.forEach(button => {
+          button.addEventListener('click', (e) => {
+              e.stopPropagation();
+             
+              const panelToClose = e.target.closest('.slide-out, .user-slide-out');
+              closeSlide(panelToClose);
+          });
+      });
+      
+    
+      document.body.addEventListener('click', (e) => {
+          const link = e.target.closest('a.smooth-redirect');
+          if (link && !e.metaKey && !e.ctrlKey) {
+              e.preventDefault();
+              const destination = link.href;
+              screenContent.style.opacity = '0';
+              setTimeout(() => {
+                  window.location.href = destination;
+              }, 400); 
+          }
+      });
+      
+      function handleGeolocation() {
+          locationDisplay.innerHTML = `<i class="fas fa-spinner fa-spin loading-spinner"></i> Finding location...`;
+          hospitalList.innerHTML = `<li class="list-placeholder"><i class="fas fa-spinner fa-spin loading-spinner"></i> Loading hospitals...</li>`;
+          if (navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition(
+                  (position) => {
+                      const { latitude, longitude } = position.coords;
+                      fetchReverseGeocode(latitude, longitude);
+                      fetchNearbyHospitals(latitude, longitude);
+                      hasFetchedLocation = true;
+                  },
+                  (error) => {
+                      locationDisplay.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Location access denied.`;
+                      hospitalList.innerHTML = `<li class="list-placeholder">Cannot fetch hospitals without location.</li>`;
+                  }
+              );
+          } else {
+               locationDisplay.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Geolocation not supported.`;
+               hospitalList.innerHTML = ``;
+          }
+      }
+
+      async function fetchReverseGeocode(lat, lon) {
+          await new Promise(resolve => setTimeout(resolve, 800));
+          locationDisplay.innerHTML = `<i class="fas fa-map-marker-alt"></i> Location: Delhi, India`;
+      }
+
+      async function fetchNearbyHospitals(lat, lon) {
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          const simulatedHospitals = [{ name: 'Banarsidas Chandiwala Institute of Medical Sciences', distance: '300m' },{ name: 'Holy Family Hospital, Okhla', distance: '4.8km' },{ name: 'Fortis Escorts Heart Institute, Okhla', distance: '5.5km' },{ name: 'Indraprastha Apollo Hospital, Sarita Vihar', distance: '6.5km' }];
+          hospitalList.innerHTML = '';
+          simulatedHospitals.forEach(hospital => {
+              const li = document.createElement('li');
+              li.textContent = `${hospital.name}: ${hospital.distance}`;
+              hospitalList.appendChild(li);
+          });
+      }
+
+      function enterEditMode() {
+          editName.value = displayName.textContent.trim();
+          editAge.value = displayAge.textContent.trim();
+          editGender.value = displayGender.textContent.trim();
+          editHeight.value = displayHeight.textContent.trim();
+          editWeight.value = displayWeight.textContent.trim();
+          userSlideOutPanel.classList.add('edit-mode');
+      }
+
+      function exitEditMode() { userSlideOutPanel.classList.remove('edit-mode'); }
+      editProfileBtn.addEventListener('click', enterEditMode);
+      cancelProfileEditBtn.addEventListener('click', exitEditMode);
+      profileEditForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          displayName.textContent = editName.value.trim();
+          displayAge.textContent = editAge.value.trim();
+          displayGender.textContent = editGender.value.trim();
+          displayHeight.textContent = editHeight.value.trim();
+          displayWeight.textContent = editWeight.value.trim();
+          exitEditMode();
+      });
+
+      function openReminderModal() {
+          closeSlide(userSlideOut);
+          screenContent.classList.add('modal-is-open');
+          reminderModal.classList.add('active'); 
+      }
+      function closeReminderModal() { 
+          screenContent.classList.remove('modal-is-open');
+          reminderModal.classList.remove('active'); 
+          reminderForm.reset(); 
+      }
+      function saveReminders() { localStorage.setItem('microClinicReminders', JSON.stringify(reminders)); }
+      function renderReminders() {
+          reminderList.innerHTML = '';
+          if (reminders.length === 0) {
+              const placeholder = document.createElement('p');
+              placeholder.className = 'list-placeholder';
+              placeholder.textContent = 'No reminders added yet.';
+              reminderList.appendChild(placeholder);
+              return;
+          }
+          reminders.forEach(reminder => {
+              const reminderEl = document.createElement('li');
+              reminderEl.className = 'reminder-item';
+              reminderEl.dataset.id = reminder.id;
+              reminderEl.innerHTML = `
+                  <div class="reminder-info">
+                       <i class="fas fa-pills"></i>
+                       <div class="reminder-text">
+                          <p class="med-name">${reminder.name}</p>
+                          <p class="med-details">${reminder.times} - ${reminder.meal}</p>
+                       </div>
+                  </div>
+                  <button class="delete-reminder-btn" title="Delete Reminder"><i class="fas fa-trash-alt"></i></button>
+              `;
+              reminderList.appendChild(reminderEl);
+          });
+      }
+
+      addReminderBtn.addEventListener('click', openReminderModal);
+      cancelReminderBtn.addEventListener('click', closeReminderModal);
+      reminderModal.addEventListener('click', (e) => { if(e.target === reminderModal) closeReminderModal(); });
+      reminderForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          reminders.push({
+              id: Date.now(),
+              name: document.getElementById('med-name').value.trim(),
+              times: document.getElementById('med-times').value.trim(),
+              meal: document.getElementById('med-meal').value,
+          });
+          saveReminders(); renderReminders(); closeReminderModal();
+      });
+      reminderList.addEventListener('click', (e) => {
+          const deleteBtn = e.target.closest('.delete-reminder-btn');
+          if (deleteBtn) {
+              const reminderItem = deleteBtn.closest('.reminder-item');
+              if (reminderItem) {
+                reminders = reminders.filter(r => r.id !== parseInt(reminderItem.dataset.id, 10));
+                saveReminders(); renderReminders();
+              }
+          }
+      });
+      
+      
+      changeLanguage(savedLang);
+      renderReminders();
+    });
+  </script>
+
+</body>
+</html>
