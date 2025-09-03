@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediScanAI - Blood Bank</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- UPDATED: Font Awesome link to match home.html for icon consistency -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- Full CSS copied and merged -->
+  <style>
+      :root {
+        /* --- NEW: Blue and Orange Theme inspired by the logo --- */
+        --accent-color: #ff7618; /* Vibrant Orange for CTAs */
+        --accent-dark: #e66000;
+        --accent-glow: rgba(255, 118, 24, 0.35);
+
+        --interaction-color: #1497d7; /* Professional Blue for links and focus */
+        --interaction-dark: #107ab5;
+        --interaction-glow: rgba(20, 151, 215, 0.4);
+
+        --page-bg: #e8f4fa; /* Light, airy blue background */
+        --phone-body: #f7f9fa; /* A cooler off-white for the screen */
+        --text-primary: #1a2b34; /* Dark blue-grey for high contrast */
+        --text-secondary: #5a6a72; /* Muted grey for supporting text */
+        
+        --white-color: #ffffff;
+        --border-color: #dce4e8; /* Cooler border color */
+        --danger-color: #e53935; /* For emergency button */
+        --danger-dark: #c62828;
+        --danger-glow: rgba(229, 57, 53, 0.35);
+        
+        /* Fallbacks to maintain structure, pointing to the new interaction color */
+        --primary-color: var(--interaction-color);
+        --primary-dark: var(--interaction-dark);
+        --primary-glow: var(--interaction-glow);
+        --active-color: var(--interaction-color); 
+        --primary-color-dark: var(--interaction-dark);
+
+        /* Blood Bank Specific Color (KEPT for thematic consistency) */
+        --blood-red: #d32f2f;
+
+        --border-radius-phone: 40px;
+        --spacing-unit: 8px;
+        --transition-fast: 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --transition-smooth: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+        --light-grey: #f0f2f5;
+        --medium-grey: #c0c8cc;
+        --dark-grey: #555c61;
+        --shadow-light: rgba(0, 0, 0, 0.1);
+        --shadow-medium: rgba(0, 0, 0, 0.15);
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { height: 100%; width: 100%; font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      body { background-color: var(--page-bg); display: flex; align-items: center; justify-content: center; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; padding: 20px 0; }
+      .smartphone { width: 360px; height: 100%; max-height: 700px; background-color: var(--white-color); border: none; padding: 0; border-radius: var(--border-radius-phone); box-shadow: 0 25px 60px -12px rgba(0,0,0,0.25), 0 0px 15px rgba(0,0,0,0.1); display: flex; overflow: hidden; }
+      .screen-content { width: 100%; height: 100%; background-color: var(--phone-body); border-radius: var(--border-radius-phone); display: flex; flex-direction: column; overflow: hidden; position: relative; transition: box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease-out; }
+      .app-header, .app-main, .app-footer, .chatbot-wrapper, .slide-out, .user-slide-out { transition: filter 0.3s ease; }
+      .screen-content.chatbot-is-open > *:not(.chatbot-wrapper),
+      .screen-content.slide-active > *:not(.slide-out),
+      .screen-content.user-slide-active > *:not(.user-slide-out),
+      .screen-content.modal-is-open > *:not(.reminder-modal-overlay) { filter: blur(3px) saturate(0.9); pointer-events: none; }
+      .screen-content.slide-active { box-shadow: 5px 8px 25px rgba(0, 0, 0, 0.2); }
+      .screen-content.user-slide-active { box-shadow: -5px 8px 25px rgba(0, 0, 0, 0.2); }
+      .screen-content.user-slide-active .chatbot-wrapper,
+      .screen-content.slide-active .chatbot-wrapper { display: none; }
+      .app-header { display: flex; justify-content: space-between; align-items: center; padding: calc(var(--spacing-unit) * 3) calc(var(--spacing-unit) * 2.5); flex-shrink: 0; position: relative; z-index: 20; }
+      
+      .app-main { 
+          flex-grow: 1; display: flex; flex-direction: column; 
+          align-items: center; padding: 0; overflow-y: auto;
+          position: relative; -ms-overflow-style: none; scrollbar-width: none;
+      }
+      .app-main::-webkit-scrollbar { display: none; }
+      .app-main p { color: var(--text-secondary); font-size: 15px; line-height: 1.6; }
+      .app-footer { flex-shrink: 0; display: flex; justify-content: space-around; align-items: center; padding: var(--spacing-unit) calc(var(--spacing-unit) * 2.5) calc(var(--spacing-unit) * 2.5); background: linear-gradient(to top, var(--phone-body) 30%, transparent); margin-top: auto; position: relative; z-index: 20; }
+      
+      /* === UPDATED ICON STYLES from home.html === */
+      .icon-btn { background: transparent; border: none; cursor: pointer; padding: var(--spacing-unit); border-radius: 50%; display: inline-flex; transition: all var(--transition-fast); -webkit-tap-highlight-color: transparent; text-decoration: none; }
+      .icon-btn svg, .icon-btn i { width: 28px; height: 28px; font-size: 24px; color: var(--text-secondary); line-height: 28px; text-align: center; transition: all var(--transition-fast); }
+      .icon-btn:not(.icon-btn--primary):not(.icon-btn--emergency):not(.active):hover { transform: translateY(-3px); background-color: #e2eef3; }
+      .icon-btn:not(.icon-btn--primary):not(.icon-btn--emergency):not(.active):hover svg,
+      .icon-btn:not(.icon-btn--primary):not(.icon-btn--emergency):not(.active):hover i { color: var(--interaction-dark); }
+      .icon-btn.active { background-color: rgba(20, 151, 215, 0.1); }
+      .icon-btn.active svg, .icon-btn.active i { color: var(--interaction-color); }
+      .icon-btn.active:hover { background-color: rgba(20, 151, 215, 0.18); transform: translateY(-2px); }
+      .icon-btn--emergency { background-color: var(--danger-color); box-shadow: 0 4px 15px var(--danger-glow); }
+      .icon-btn--emergency i { color: var(--white-color); }
+      .icon-btn--emergency:hover { background-color: var(--danger-dark); transform: translateY(-4px) scale(1.05); box-shadow: 0 8px 20px var(--danger-glow); }
+      /* === END OF UPDATED ICON STYLES === */
+      
+      @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+      /* === START BLOOD BANK STYLES === */
+      .content-wrapper-blood { position: relative; flex-grow: 1; width: 100%; height: 100%; }
+      #blood-bank-home { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 0 20px; box-sizing: border-box; position: absolute; top: 0; left: 0; transition: opacity 0.4s ease, transform 0.4s ease; }
+      #blood-list-view { display: flex; flex-direction: column; width: 100%; height: 100%; position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none; transform: translateX(100%); transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); padding: 10px 15px; box-sizing: border-box; }
+      #blood-list-view.active { opacity: 1; pointer-events: auto; transform: translateX(0); }
+      #blood-bank-home.hidden { opacity: 0; pointer-events: none; transform: translateX(-100%); }
+      .page-header { font-size: 2.2em; font-weight: 700; color: var(--blood-red); margin-top: 10px; margin-bottom: 5px; animation: fadeInUp 0.5s ease-out; font-family: 'Bricolage Grotesque', sans-serif; }
+      .page-subheader { font-size: 1em; color: var(--dark-grey); margin-bottom: 30px; max-width: 90%; animation: fadeInUp 0.5s ease-out 0.1s both; text-align: center; }
+      .action-button { width: 95%; padding: 16px; font-size: 1.1em; font-weight: 600; border-radius: 15px; border: none; cursor: pointer; transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1); display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; text-align: center; will-change: transform, box-shadow; font-family: 'Bricolage Grotesque', sans-serif; }
+      .action-button i { font-size: 1.2em; }
+      .action-button:hover { transform: translateY(-5px); }
+      #check-availability-btn { background-color: var(--blood-red); color: white; box-shadow: 0 5px 20px rgba(211, 47, 47, 0.3); }
+      #check-availability-btn:hover { background-color: #b71c1c; box-shadow: 0 8px 25px rgba(211, 47, 47, 0.4); }
+      #register-donor-btn { background-color: white; color: var(--blood-red); border: 1.5px solid var(--border-color); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+      #register-donor-btn:hover { background-color: #fff; border-color: #ccc; box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+      .list-view-header { width: 100%; display: flex; align-items: center; padding-bottom: 15px; animation: fadeIn 0.4s ease; flex-shrink: 0; }
+      .back-button { background: none; border: none; font-size: 1.3em; color: var(--dark-grey); cursor: pointer; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; transition: all 0.2s; margin-right: 12px; -webkit-tap-highlight-color: transparent; flex-shrink: 0; }
+      .back-button:hover { color: var(--blood-red); background-color: #f0f0f0; transform: scale(1.05); }
+      .blood-group-filter { flex-grow: 1; font-family: 'Bricolage Grotesque', sans-serif; }
+      .select-wrapper { position: relative; }
+      #blood-group-filter-select { font-family: 'Manrope', sans-serif; width:100%; padding:9px 12px; font-size: 0.9em; border:1px solid var(--medium-grey); border-radius: 8px; -webkit-appearance: none; -moz-appearance: none; appearance: none; padding-right: 35px; }
+      .select-wrapper::after { content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; color: var(--dark-grey); position: absolute; top: 50%; right: 15px; transform: translateY(-50%); pointer-events: none; transition: transform 0.2s ease; font-size: 0.9em; }
+      #donor-list { list-style: none; padding: 0; margin: 0; width: 100%; flex-grow: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--medium-grey) transparent; }
+      #donor-list::-webkit-scrollbar { width: 5px; }
+      #donor-list::-webkit-scrollbar-track { background: transparent; }
+      #donor-list::-webkit-scrollbar-thumb { background-color: var(--medium-grey); border-radius: 10px; }
+      .donor-card { background: #fff; border-radius: 12px; margin-bottom: 12px; padding: 12px 15px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); display: flex; align-items: center; animation: scaleUp 0.4s ease-out; transition: transform 0.2s, box-shadow 0.2s; }
+      .donor-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+      .donor-info { text-align: left; flex-grow: 1; }
+      .donor-blood-group { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.8em; font-weight: 700; color: var(--blood-red); margin-right: 15px; min-width: 60px; text-align: center; }
+      .donor-info p { margin: 2px 0; line-height: 1.4; font-size: 0.9em; color: var(--dark-grey); animation: none; }
+      .donor-info .donor-location i, .donor-contact a i { margin-right: 6px; color: var(--interaction-color); width: 14px; text-align: center; } /* THEMED */
+      .donor-contact a { color: var(--interaction-dark); text-decoration: none; font-weight: 600; padding: 5px 12px; border-radius: 20px; background-color: rgba(20, 151, 215, 0.1); transition: all 0.2s; display: inline-flex; align-items: center; margin-top: 5px; } /* THEMED */
+      .donor-contact a:hover { background-color: var(--interaction-color); color: white; } /* THEMED */
+      .donor-contact a:hover i { color: white; }
+      .no-donors-message { font-family: 'Bricolage Grotesque', sans-serif; text-align: center; padding: 40px 20px; color: var(--medium-grey); font-size: 1em; animation: fadeIn 0.5s ease; }
+      .no-donors-message i { font-size: 2.5em; display: block; margin-bottom: 15px; }
+      .donor-card-actions { margin-left: auto; padding-left: 10px; }
+      .edit-donor-btn { background: none; border: none; font-size: 1.1em; color: var(--medium-grey); cursor: pointer; padding: 8px; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+      .edit-donor-btn:hover { background-color: var(--light-grey); color: var(--interaction-color); } /* THEMED */
+      /* === END BLOOD BANK STYLES === */
+
+      /* Universal Side Panels, Chatbot, Modals etc. */
+      .chatbot-wrapper{z-index:100}.chatbot-fab{position:absolute;bottom:85px;right:20px;width:50px;height:50px;background-color:var(--interaction-color);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 5px 20px var(--interaction-glow);transition:transform .2s ease,box-shadow .2s ease;z-index:1000}.chatbot-fab:hover{transform:scale(1.1);box-shadow:0 8px 25px var(--interaction-glow)}.chatbot-fab svg{position:absolute;width:28px;height:28px;stroke:var(--white-color);stroke-width:2;transition:transform .3s ease,opacity .3s ease}.chatbot-fab .icon-close{transform:rotate(-90deg) scale(0);opacity:0}.chatbot-fab.open .icon-chat{transform:rotate(90deg) scale(0);opacity:0}.chatbot-fab.open .icon-close{transform:rotate(0) scale(1);opacity:1}.chatbot-window{position:absolute;bottom:145px;right:20px;width:300px;height:400px;background-color:var(--white-color);border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.15);display:flex;flex-direction:column;overflow:hidden;transform-origin:bottom right;transform:translateY(20px) scale(.95);opacity:0;visibility:hidden;transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s ease,visibility .3s;z-index:999}.chatbot-window.open{transform:translateY(0) scale(1);opacity:1;visibility:visible}.chatbot-header{padding:16px;background-color:var(--phone-body);border-bottom:1px solid var(--border-color);flex-shrink:0}.chatbot-header h3{font-size:16px;font-weight:700;color:var(--text-primary)}.chatbot-messages{flex-grow:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}.chatbot-messages::-webkit-scrollbar{width:5px}.chatbot-messages::-webkit-scrollbar-thumb{background:var(--border-color);border-radius:10px}.chatbot-messages::-webkit-scrollbar-track{background:transparent}.message{display:flex;max-width:80%;font-size:14px;line-height:1.5;animation:message-in .3s ease forwards}@keyframes message-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.message-content{padding:10px 14px;border-radius:18px}.ai-message{align-self:flex-start}.ai-message .message-content{background-color:var(--phone-body);color:var(--text-primary);border-top-left-radius:4px}.user-message{align-self:flex-end}.user-message .message-content{background-color:var(--interaction-color);color:var(--white-color);border-top-right-radius:4px}.typing-indicator{display:flex;align-items:center;gap:5px;padding:10px 14px}.typing-indicator span{width:8px;height:8px;background-color:#ccc;border-radius:50%;animation:typing-dots 1.2s infinite ease-in-out}.typing-indicator span:nth-child(1){animation-delay:0s}.typing-indicator span:nth-child(2){animation-delay:.2s}.typing-indicator span:nth-child(3){animation-delay:.4s}@keyframes typing-dots{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}.chatbot-input-form{display:flex;align-items:center;padding:10px;border-top:1px solid var(--border-color)}.chatbot-tool-btn{width:36px;height:36px;background:transparent;border:none;border-radius:50%;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background-color var(--transition-fast);margin-right:6px}.chatbot-tool-btn:hover{background-color:#e2eef3}.chatbot-tool-btn svg{width:22px;height:22px;stroke:var(--text-secondary);stroke-width:1.5}#chatbot-input{flex-grow:1;border:none;outline:none;background:transparent;padding:10px;font-size:14px;color:var(--text-primary);font-family:inherit}#chatbot-send-btn{width:36px;height:36px;background:var(--interaction-color);border:none;border-radius:50%;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background-color var(--transition-fast)}#chatbot-send-btn:hover{background:var(--interaction-dark)}#chatbot-send-btn svg{width:18px;height:18px;stroke:var(--white-color);stroke-width:2.5}
+      .loading-spinner { font-size: 0.8em; margin-right: 8px; }
+      .slide-out, .user-slide-out { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--white-color); transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); padding: 30px 20px 20px 20px; box-sizing: border-box; text-align: left; overflow-y: auto; will-change: transform; border-radius: var(--border-radius-phone); z-index: 25; font-family: 'Bricolage Grotesque', sans-serif; }
+      .slide-out { transform: translateX(-100%); }
+      .user-slide-out { transform: translateX(100%); }
+      .slide-out.active { transform: translateX(0); }
+      .user-slide-out.active { transform: translateX(0); }
+      .slide-out h2, .user-slide-out h2 { font-size: 1.4em; margin-top: 10px; margin-bottom: 15px; color: var(--interaction-color); text-align: left; animation: fadeInUp 0.5s ease-out 0.1s both; }
+      .slide-out h3, .user-slide-out h3 { font-size: 1.15em; margin-top: 18px; margin-bottom: 8px; text-align: left; color: var(--interaction-dark); animation: fadeInUp 0.5s ease-out 0.2s both; }
+      .slide-out p, .user-slide-out p { font-size: 0.9em; margin-bottom: 5px; text-align: left; color: var(--dark-grey); animation: fadeInUp 0.5s ease-out 0.3s both; line-height: 1.4; }
+      .location-display { display: flex; align-items: center; gap: 6px; font-family: 'Manrope', sans-serif; color: var(--text-secondary); }
+      .hospital-list { list-style-type: none; padding-left: 0; margin-top: 10px; animation: fadeInUp 0.5s ease-out 0.4s both; }
+      .hospital-list li { margin-bottom: 8px; text-align: left; padding-left: 25px; position: relative; font-size: 0.9em; display: flex; align-items: center; color: var(--text-secondary); }
+      .hospital-list li::before { content: "\f479"; font-family: "Font Awesome 6 Free"; font-weight: 900; color: var(--interaction-color); position: absolute; left: 0; top: 50%; transform: translateY(-50%); font-size: 1.1em; }
+      .hospital-list .list-placeholder { color: var(--medium-grey); font-style: italic; }
+      .close-button { position: absolute; top: 15px; right: 18px; font-size: 1.7em; color: var(--medium-grey); cursor: pointer; background: none; border: none; outline: none; transition: color 0.2s ease, transform 0.2s ease; z-index: 26; padding: 5px; line-height: 1; }
+      .close-button:hover { color: var(--dark-grey); transform: rotate(90deg) scale(1.1); }
+      .settings-accordion { margin-top: 20px; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); animation: fadeInUp 0.5s ease-out 0.3s both; }
+      .settings-accordion summary { font-size: 1.15em; font-weight: 500; color: var(--interaction-dark); padding: 12px 0; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+      .settings-accordion summary::-webkit-details-marker { display: none; }
+      .settings-accordion summary::after { content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 0.8em; color: var(--medium-grey); transition: transform 0.2s ease-in-out; }
+      .settings-accordion[open] summary::after { transform: rotate(-180deg); }
+      .language-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; padding-bottom: 15px; }
+      .lang-button { background-color: var(--light-grey); border: 1px solid transparent; border-radius: 8px; padding: 6px 5px; font-family: 'Bricolage Grotesque', sans-serif; font-size: 0.85em; font-weight: 500; cursor: pointer; text-align: center; transition: all 0.2s ease-out; color: var(--dark-grey); }
+      .lang-button:hover { background-color: #e0e4e8; transform: translateY(-1px); }
+      .lang-button.active { background-color: var(--interaction-color); color: white; font-weight: 600; border-color: var(--interaction-dark); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+      .user-profile-header { display: flex; align-items: center; margin-bottom: 5px; }
+      .edit-profile-btn { background: none; border: none; color: var(--dark-grey); font-size: 0.9em; cursor: pointer; padding: 6px; border-radius: 50%; transition: background-color 0.2s ease, color 0.2s ease; line-height: 1; margin-left: 8px; }
+      .edit-profile-btn:hover { background-color: var(--light-grey); color: var(--interaction-color); }
+      .user-info-display p { margin: 8px 0; font-size: 0.9em; animation: none; color: var(--text-secondary);}
+      .user-info-display p > strong { font-weight: 600; margin-right: 5px; color: var(--dark-grey); }
+      #profile-edit-form { display: none; border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 10px; }
+      .user-slide-out.edit-mode .user-info-display,
+      .user-slide-out.edit-mode .user-profile-lower-content { display: none; }
+      .user-slide-out.edit-mode #profile-edit-form { display: block; animation: fadeIn 0.3s ease; }
+      .logout-button { background: rgba(20, 151, 215, 0.1); border-radius: 20px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); border: 1px solid rgba(20, 151, 215, 0.15); padding: 10px 22px; font-size: 0.95em; font-weight: 500; color: var(--interaction-dark); cursor: pointer; transition: all 0.25s ease; margin-top: 25px; width: fit-content; margin-left: auto; margin-right: auto; display: block; }
+      .logout-button:hover { background: rgba(20, 151, 215, 0.18); border-color: rgba(20, 151, 215, 0.25); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12); }
+      .reminder-section { margin-top: 20px; text-align: left; padding: 12px 15px; background-color: rgba(232, 244, 250, 0.5); border-radius: 10px; border: 1px solid rgba(20, 151, 215, 0.1); animation: fadeIn 0.6s ease-out 0.3s both; }
+      .reminder-header { display: flex; justify-content: space-between; align-items: center; }
+      .add-reminder-btn { background-color: var(--interaction-color); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 1em; cursor: pointer; transition: all 0.2s ease; }
+      .add-reminder-btn:hover { transform: scale(1.1) rotate(90deg); background-color: var(--interaction-dark); }
+      .reminder-list { list-style: none; padding: 0; margin: 10px 0 0 0; }
+      .reminder-list .list-placeholder { text-align: center; padding: 20px; color: var(--medium-grey); font-size: 0.9em; }
+      .reminder-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 10px; background-color: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); animation: scaleUp 0.4s ease-out forwards; position: relative; }
+      .reminder-item:last-child { margin-bottom: 0; }
+      .reminder-info { display: flex; align-items: center; }
+      .reminder-item i.fa-pills { font-size: 1.3em; color: var(--interaction-color); margin-right: 12px; flex-shrink: 0; }
+      .reminder-text { display: flex; flex-direction: column; }
+      .reminder-text p { animation: none; margin: 0; line-height: 1.3; }
+      .reminder-text .med-name { font-weight: 600; color: #444; font-size: 0.9em; }
+      .reminder-text .med-details { font-size: 0.8em; color: #777; }
+      .delete-reminder-btn { background: none; border: none; color: var(--medium-grey); cursor: pointer; font-size: 1.1em; padding: 5px; transition: color 0.2s ease, transform 0.2s ease; }
+      .delete-reminder-btn:hover { color: var(--danger-color); transform: scale(1.15); }
+      .health-progress-section { margin-top: 20px; text-align: left; padding: 12px 15px; background-color: rgba(232, 244, 250, 0.5); border-radius: 10px; border: 1px solid rgba(20, 151, 215, 0.1); animation: fadeIn 0.6s ease-out 0.3s both; }
+      .progress-bar { height: 10px; background-color: #e8e8e8; border-radius: 5px; margin-top: 0; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.08); }
+      .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--interaction-color), #57b9e6); border-radius: 5px; transition: width 1.2s cubic-bezier(0.65, 0, 0.35, 1); }
+      .day-labels { display: flex; justify-content: space-between; font-size: 0.7em; margin-top: 6px; color: #888; }
+      .reminder-modal-overlay { position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.5); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+      .reminder-modal-overlay.active { opacity: 1; visibility: visible; }
+      .reminder-modal-content { background-color: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); width: 90%; max-width: 280px; transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); font-family: 'Bricolage Grotesque', sans-serif;}
+      .reminder-modal-overlay.active .reminder-modal-content { transform: scale(1); }
+      .reminder-modal-content h3 { margin-top: 0; margin-bottom: 15px; color: var(--interaction-color); text-align: center; font-size: 1.2em; }
+      .reminder-modal-content h3.blood-modal-title { color: var(--blood-red); }
+      .form-group { width: 100%; text-align: left; margin-bottom: 12px; }
+      .form-group label { display: block; font-size: 0.85em; font-weight: 500; color: var(--dark-grey); margin-bottom: 4px; }
+      .themed-input, .themed-select, .form-group input, .form-group select { width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1px solid var(--medium-grey); background-color: var(--white-color); border-radius: 8px; font-size: 0.95em; color: var(--text-primary); font-family: 'Manrope', sans-serif; transition: border-color var(--transition-fast), box-shadow var(--transition-fast); }
+      .themed-input:focus, .themed-select:focus, .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--interaction-color); box-shadow: 0 0 0 3px var(--interaction-glow); }
+      .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+      .modal-buttons button { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid transparent; font-family: 'Manrope', sans-serif; font-weight: 600; font-size: 0.9em; cursor: pointer; transition: all 0.2s ease; }
+      .modal-save-btn { background-color: var(--interaction-color); color: white; border-color: var(--interaction-dark); }
+      .modal-save-btn:hover { background-color: var(--interaction-dark); }
+      .modal-save-btn.blood-save-btn { background-color: var(--blood-red); border-color: #b71c1c; }
+      .modal-save-btn.blood-save-btn:hover { background-color: #b71c1c; }
+      .modal-cancel-btn { background-color: #f1f1f1; color: var(--dark-grey); }
+      .modal-cancel-btn:hover { background-color: #e0e0e0; }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes scaleUp { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+  </style>
+</head>
+<body>
+  <div class="smartphone">
+    <div class="screen-content">
+      <!-- === UPDATED HEADER === -->
+      <header class="app-header">
+        <button class="icon-btn" aria-label="Menu" id="menu-btn" data-title-key="menuBtnTitle"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 28px; height: 28px;"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg></button>
+        <button class="icon-btn" aria-label="Profile" id="user-btn" data-title-key="userBtnTitle"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 28px; height: 28px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></button>
+      </header>
+
+      <main class="app-main">
+        <div class="content-wrapper-blood">
+            <!-- Main View -->
+            <div id="blood-bank-home">
+                <h1 class="page-header" data-key="bloodBankHeader">Blood Bank</h1>
+                <p class="page-subheader" data-key="bloodBankSubheader">Check for available donors or register to save a life.</p>
+                <button class="action-button" id="check-availability-btn">
+                    <i class="fas fa-search"></i><span data-key="checkAvailabilityBtn"> Check Availability</span>
+                </button>
+                <button class="action-button" id="register-donor-btn">
+                    <i class="fas fa-hand-holding-medical"></i><span data-key="registerDonorBtn"> Register as Donor</span>
+                </button>
+            </div>
+            
+            <!-- Donor List View -->
+            <div id="blood-list-view">
+                <div class="list-view-header">
+                    <button class="back-button" title="Back"><i class="fas fa-arrow-left"></i></button>
+                    <div class="form-group blood-group-filter" style="margin-bottom:0;">
+                      <div class="select-wrapper">
+                         <select id="blood-group-filter-select">
+                              <option value="" data-key="filterAllGroups">Show All Blood Groups</option>
+                              <option value="A+">A+</option><option value="A-">A-</option>
+                              <option value="B+">B+</option><option value="B-">B-</option>
+                              <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                              <option value="O+">O+</option><option value="O-">O-</option>
+                         </select>
+                       </div>
+                    </div>
+                </div>
+                <ul id="donor-list">
+                    <!-- Donor cards will be populated by JavaScript -->
+                </ul>
+            </div>
+        </div>
+      </main>
+
+      <!-- === UPDATED FOOTER === -->
+      <footer class="app-footer">
+        <a href="/clinic" class="icon-btn smooth-redirect" aria-label="Home" data-title-key="footerTitleHome">
+            <i class="fa-solid fa-house"></i>
+        </a>
+        <a href="/emergency" class="icon-btn icon-btn--emergency smooth-redirect" aria-label="Medical Emergency" data-title-key="footerTitleEmergency">
+            <i class="fa-solid fa-truck-medical"></i>
+        </a>
+      </footer>
+      
+      <div class="chatbot-wrapper">
+        <div class="chatbot-fab" id="chatbot-fab" role="button" data-title-key="chatbotFabTitle" aria-label="Open AI Assistant"><svg class="icon-chat" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8a8.5 8.5 0 0 1-7.6 4.7a8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8a8.5 8.5 0 0 1 4.7-7.6a8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg><svg class="icon-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
+        <div class="chatbot-window" id="chatbot-window"><div class="chatbot-header"><h3 data-key="chatbotTitle">AI Assistant</h3></div><div class="chatbot-messages" id="chatbot-messages"></div><form class="chatbot-input-form" id="chatbot-input-form"><button type="button" id="chatbot-clear-btn" class="chatbot-tool-btn" aria-label="Clear Chat" data-title-key="chatbotClearTitle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M3 21v-4a4 4 0 0 1 4 -4h5"></path><path d="M21 3a16 16 0 0 0 -12.8 10.2"></path><path d="M21 3a16 16 0 0 1 -10.2 12.8"></path><path d="M10.6 9a9 9 0 0 1 4.4 4.4"></path></svg></button><input type="text" id="chatbot-input" data-placeholder-key="chatbotPlaceholder" autocomplete="off"><button id="chatbot-send-btn" type="submit" aria-label="Send Message" data-title-key="chatbotSendTitle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button></form></div>
+      </div>
+     
+      <div class="slide-out" id="menu-panel">
+        <button class="close-button">×</button><h2 data-key="menuHello">Hello User!</h2><p class="location-display"><i class="fas fa-map-marker-alt"></i> Location: Rourkela, Odisha</p>
+        <details class="settings-accordion"><summary data-key="settingsTitle">Settings</summary><div class="language-selector"><button class="lang-button" data-lang="en">English</button><button class="lang-button" data-lang="hi">हिंदी</button><button class="lang-button" data-lang="bn">বাংলা</button><button class="lang-button" data-lang="te">తెలుగు</button><button class="lang-button" data-lang="mr">मराठी</button><button class="lang-button" data-lang="ta">தமிழ்</button><button class="lang-button" data-lang="ur">اردو</button><button class="lang-button" data-lang="gu">ગુજરાતી</button><button class="lang-button" data-lang="kn">ಕನ್ನಡ</button><button class="lang-button" data-lang="or">ଓଡ଼ିଆ</button><button class="lang-button" data-lang="ml">മലയാളം</button><button class="lang-button" data-lang="pa">ਪੰਜਾਬੀ</button><button class="lang-button" data-lang="as">অসমীয়া</button></div></details>
+        <h3 data-key="menuHospitalsTitle">Nearby Hospitals</h3><ul class="hospital-list"></ul>
+      </div>
+
+      <div class="user-slide-out" id="user-panel">
+        <button class="close-button">×</button><div class="user-profile-header"><h2 data-key="profileTitle">User Profile</h2><button class="edit-profile-btn" data-title-key="editProfileTitle"><i class="fas fa-pencil-alt"></i></button></div>
+        <div class="user-info-display"><p><strong data-key="profileUserIdLabel">User Id:</strong> <span>JEEV3317</span></p><p><strong data-key="profileNameLabel">Name:</strong> <span id="display-name">Sita Kumari</span></p><p><strong data-key="profileAgeLabel">Age:</strong> <span id="display-age">22</span> <span data-key="yrUnit">yr</span></p><p><strong data-key="profileGenderLabel">Gender:</strong> <span id="display-gender">Female</span></p><p><strong data-key="profileHeightLabel">Height:</strong> <span id="display-height">173</span> <span data-key="cmUnit">cm</span></p><p><strong data-key="profileWeightLabel">Weight:</strong> <span id="display-weight">71</span> <span data-key="kgUnit">kg</span></p></div>
+        <form id="profile-edit-form"><div class="form-group"><label for="edit-name" data-key="profileNameLabel">Name</label><input type="text" id="edit-name" required class="themed-input"></div><div class="form-group"><label for="edit-age" data-key="profileAgeLabel">Age</label><input type="number" id="edit-age" required class="themed-input"></div><div class="form-group"><label for="edit-gender" data-key="profileGenderLabel">Gender</label><select id="edit-gender" required class="themed-select"><option value="Female">Female</option><option value="Male">Male</option><option value="Other">Other</option></select></div><div class="form-group"><label for="edit-height" data-key="profileHeightLabelFull">Height (cm)</label><input type="number" id="edit-height" required class="themed-input"></div><div class="form-group"><label for="edit-weight" data-key="profileWeightLabelFull">Weight (kg)</label><input type="number" id="edit-weight" required class="themed-input"></div><div class="modal-buttons"><button type="button" id="cancel-profile-edit" class="modal-cancel-btn" data-key="cancelBtn">Cancel</button><button type="submit" class="modal-save-btn" data-key="saveBtn">Save</button></div></form>
+        <div class="user-profile-lower-content"><div class="reminder-section"><div class="reminder-header"><h3 data-key="profileReminders" style="margin:0;">Reminders</h3><button class="add-reminder-btn" title="Add Reminder">+</button></div><ul class="reminder-list"></ul></div><div class="health-progress-section"><h3 data-key="profileProgress">Your Health Progress (Week)</h3><div class="progress-bar"><div class="progress-bar-fill" style="width: 65%;"></div></div><div class="day-labels"><span data-key="dayMon">Mon</span><span data-key="dayTue">Tue</span><span data-key="dayWed">Wed</span><span data-key="dayThu">Thu</span><span data-key="dayFri">Fri</span><span data-key="daySat">Sat</span><span data-key="daySun">Sun</span></div></div><form method="post" action="/logout"><button type="submit" class="logout-button" data-key="logoutButton">Logout</button></form></div>
+      </div>
+      
+      <div class="reminder-modal-overlay" id="reminder-modal-overlay">
+          <div class="reminder-modal-content">
+              <h3 data-key="addReminderTitle">Add Medicine Reminder</h3><form id="reminder-form"><div class="form-group"><label for="med-name" data-key="medNameLabel">Medicine Name</label><input type="text" id="med-name" required></div><div class="form-group"><label for="med-times" data-key="medTimesLabel">Times (e.g., 08:00, 22:00)</label><input type="text" id="med-times" placeholder="Comma separated, 24h format" required></div><div class="form-group"><label for="med-meal" data-key="medMealLabel">Meal</label><select id="med-meal" required><option value="After Food">After Food</option><option value="Before Food">Before Food</option></select></div><div class="modal-buttons"><button type="button" class="modal-cancel-btn" data-key="cancelBtn">Cancel</button><button type="submit" class="modal-save-btn" data-key="saveBtn">Save</button></div></form>
+          </div>
+      </div>
+      
+      <!-- Donor Registration Modal -->
+      <div class="reminder-modal-overlay" id="donor-register-modal">
+        <div class="reminder-modal-content">
+            <h3 class="blood-modal-title" data-key="registerDonorTitle">Register as a Donor</h3><form id="donor-register-form"><div class="form-group"><label for="donor-name" data-key="donorNameLabel">Full Name</label><input type="text" id="donor-name" required></div><div class="form-group"><label for="donor-age" data-key="donorAgeLabel">Age</label><input type="number" id="donor-age" min="18" max="65" required></div><div class="form-group"><label for="donor-blood-group" data-key="donorBloodGroupLabel">Blood Group</label><select id="donor-blood-group" required><option value="" disabled selected data-key="selectGroupOption">Select Group</option><option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option><option value="AB+">AB+</option><option value="AB-">AB-</option><option value="O+">O+</option><option value="O-">O-</option></select></div><div class="form-group"><label for="donor-location" data-key="donorLocationLabel">Location (City)</label><input type="text" id="donor-location" required></div><div class="form-group"><label for="donor-contact" data-key="donorContactLabel">Contact No.</label><input type="tel" id="donor-contact" required></div><div class="modal-buttons"><button type="button" class="modal-cancel-btn" data-key="cancelBtn">Cancel</button><button type="submit" class="modal-save-btn blood-save-btn" data-key="registerBtn">Register</button></div></form>
+        </div>
+      </div>
+      <!-- Donor Edit Modal -->
+      <div class="reminder-modal-overlay" id="donor-edit-modal">
+        <div class="reminder-modal-content">
+            <h3 class="blood-modal-title" data-key="editDonorTitle">Edit Donor Details</h3>
+            <form id="donor-edit-form">
+                <input type="hidden" id="edit-donor-index">
+                <div class="form-group"><label for="edit-donor-name" data-key="donorNameLabel">Full Name</label><input type="text" id="edit-donor-name" required></div>
+                <div class="form-group"><label for="edit-donor-age" data-key="donorAgeLabel">Age</label><input type="number" id="edit-donor-age" min="18" max="65" required></div>
+                <div class="form-group"><label for="edit-donor-blood-group" data-key="donorBloodGroupLabel">Blood Group</label><select id="edit-donor-blood-group" required><option value="" disabled selected data-key="selectGroupOption">Select Group</option><option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option><option value="AB+">AB+</option><option value="AB-">AB-</option><option value="O+">O+</option><option value="O-">O-</option></select></div>
+                <div class="form-group"><label for="edit-donor-location" data-key="donorLocationLabel">Location (City)</label><input type="text" id="edit-donor-location" required></div>
+                <div class="form-group"><label for="edit-donor-contact" data-key="donorContactLabel">Contact No.</label><input type="tel" id="edit-donor-contact" required></div>
+                <div class="modal-buttons">
+                    <button type="button" class="modal-cancel-btn" data-key="cancelBtn">Cancel</button>
+                    <button type="submit" class="modal-save-btn blood-save-btn" data-key="saveBtn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const languageData = {
+        // === ADDED/UPDATED KEYS ===
+        footerTitleHome: { en: 'Home', hi: 'होम', bn: 'হোম' },
+        footerTitleEmergency: { en: 'Medical Emergency', hi: 'आपात चिकित्सा', bn: 'চিকিৎসা জরুরী' },
+        
+        // === EXISTING KEYS ===
+        menuBtnTitle: { en: 'Menu', hi: 'मेन्यू', bn: 'মেনু', te: 'మెను', mr: 'मेन्यू', ta: 'மெனு', ur: 'مینو', gu: 'મેનુ', kn: 'మెను', or: 'ମେନୁ', ml: 'മെനു', pa: 'ਮੀਨੂ', as: 'মেণু' },
+        userBtnTitle: { en: 'Profile', hi: 'प्रोफ़ाइल', bn: 'প্রোফাইল', te: 'ప్రొఫైల్', mr: 'प्रोफाइल', ta: 'சுயவிவரம்', ur: 'پروفائل', gu: 'પ્રોફાઇલ', kn: 'ಪ್ರೊಫೈల్', or: 'ପ੍ਰୋଫାଇଲ୍', ml: 'പ്രൊഫൈൽ', pa: 'ਪ੍ਰੋਫਾਈਲ', as: 'প্ৰফাইল' },
+        chatbotFabTitle: { en: 'Open AI Assistant', hi: 'एआई सहायक खोलें', bn: 'এআই অ্যাসিস্ট্যান্ট খুলুন' },
+        chatbotTitle: { en: 'AI Assistant', hi: 'एआई सहायक', bn: 'এআই অ্যাসিস্ট্যান্ট' },
+        chatbotPlaceholder: { en: 'Ask anything...', hi: 'कुछ भी पूछें...', bn: 'কিছু জিজ্ঞাসা করুন...' },
+        chatbotClearTitle: { en: 'Clear Chat', hi: 'चैट साफ़ करें', bn: 'চ্যাট পরিষ্কার করুন' },
+        chatbotSendTitle: { en: 'Send Message', hi: 'संदेश भेजें', bn: 'বার্তা পাঠান' },
+        chatbotInitialGreeting: { en: 'Hello! How can I assist you today?', hi: 'नमस्ते! मैं आज आपकी कैसे सहायता कर सकता हूँ?', bn: 'নমস্কার! আমি আজ আপনাকে কিভাবে সাহায্য করতে পারি?' },
+        menuHello: { en: 'Hello User!', hi: 'नमस्ते उपयोगकर्ता!', bn: 'নমস্কার ব্যবহারকারী!' },
+        settingsTitle: { en: 'Settings', hi: 'सेटिंग्स', bn: 'সেটিংস' },
+        menuHospitalsTitle: { en: 'Nearby Hospitals', hi: 'आस-पास के अस्पताल', bn: 'কাছাকাছি হাসপাতাল' },
+        profileTitle: { en: 'User Profile', hi: 'उपयोगकर्ता प्रोफ़ाइल', bn: 'ব্যবহারকারী প্রোফাইল' },
+        editProfileTitle: { en: 'Edit Profile', hi: 'प्रोफ़ाइल संपादित करें', bn: 'প্রোফাইল সম্পাদনা করুন' },
+        profileUserIdLabel: { en: 'User Id:', hi: 'उपयोगकर्ता आईडी:', bn: 'ব্যবহারকারী আইডি:' },
+        profileNameLabel: { en: 'Name:', hi: 'नाम:', bn: 'নাম:' },
+        profileAgeLabel: { en: 'Age:', hi: 'आयु:', bn: 'বয়স:' },
+        yrUnit: { en: 'yr', hi: 'वर्ष', bn: 'বছর' },
+        profileGenderLabel: { en: 'Gender:', hi: 'लिंग:', bn: 'লিঙ্গ:' },
+        profileHeightLabel: { en: 'Height:', hi: 'ऊंचाई:', bn: 'উচ্চতা:' },
+        profileHeightLabelFull: { en: 'Height (cm)', hi: 'ऊंचाई (सेमी)', bn: 'উচ্চতা (সেমি)' },
+        cmUnit: { en: 'cm', hi: 'सेमी', bn: 'সেমি' },
+        profileWeightLabel: { en: 'Weight:', hi: 'वजन:', bn: 'ওজন:' },
+        profileWeightLabelFull: { en: 'Weight (kg)', hi: 'वजन (किग्रा)', bn: 'ওজন (কেজি)' },
+        kgUnit: { en: 'kg', hi: 'किग्रा', bn: 'কেজি' },
+        profileReminders: { en: 'Reminders', hi: 'रिमाइंडर', bn: 'অনুস্মারক' },
+        profileProgress: { en: 'Your Health Progress (Week)', hi: 'आपकी स्वास्थ्य प्रगति (सप्ताह)', bn: 'আপনার স্বাস্থ্য অগ্রগতি (সপ্তাহ)' },
+        dayMon: { en: 'Mon', hi: 'सोम' }, dayTue: { en: 'Tue', hi: 'मंगल' }, dayWed: { en: 'Wed', hi: 'बुध' }, dayThu: { en: 'Thu', hi: 'गुरु' }, dayFri: { en: 'Fri', hi: 'शुक्र' }, daySat: { en: 'Sat', hi: 'शनि' }, daySun: { en: 'Sun', hi: 'रवि' },
+        logoutButton: { en: 'Logout', hi: 'लॉग आउट', bn: 'লগআউট' },
+        addReminderTitle: { en: 'Add Medicine Reminder', hi: 'दवा अनुस्मारक जोड़ें', bn: 'ঔষধ রিমাইন্ডার যোগ করুন' },
+        medNameLabel: { en: 'Medicine Name', hi: 'दवा का नाम', bn: 'ঔষধের নাম' },
+        medTimesLabel: { en: 'Times (e.g., 08:00, 22:00)', hi: 'समय (उदा. 08:00, 22:00)', bn: 'সময় (উদাঃ 08:00, 22:00)' },
+        medMealLabel: { en: 'Meal', hi: 'भोजन', bn: 'খাবার' },
+        cancelBtn: { en: 'Cancel', hi: 'रद्द करें', bn: 'বাতিল' },
+        saveBtn: { en: 'Save', hi: 'सहेजें', bn: 'সংরক্ষণ' },
+
+        bloodBankHeader: { en: 'Blood Bank', hi: 'ब्लड बैंक', bn: 'ব্লাড ব্যাংক' },
+        bloodBankSubheader: { en: 'Check for available donors or register to save a life.', hi: 'उपलब्ध दाताओं की जांच करें या जीवन बचाने के लिए पंजीकरण करें।', bn: 'উপলব্ধ দাতাদের জন্য পরীক্ষা করুন বা একটি জীবন বাঁচাতে নিবন্ধন করুন।' },
+        checkAvailabilityBtn: { en: 'Check Availability', hi: 'उपलब्धता जांचें', bn: 'উপস্থিতি পরীক্ষা করুন' },
+        registerDonorBtn: { en: 'Register as Donor', hi: 'दाता के रूप में पंजीकरण करें', bn: 'দাতা হিসেবে নিবন্ধন করুন' },
+        filterAllGroups: { en: 'Show All Blood Groups', hi: 'सभी रक्त समूह दिखाएं', bn: 'সমস্ত রক্তের গ্রুপ দেখান' },
+        registerDonorTitle: { en: 'Register as a Donor', hi: 'एक दाता के रूप में पंजीकरण करें', bn: 'একজন দাতা হিসাবে নিবন্ধন করুন' },
+        editDonorTitle: { en: 'Edit Donor Details', hi: 'दाता विवरण संपादित करें', bn: 'দাতা বিবরণ সম্পাদনা করুন' },
+        donorNameLabel: { en: 'Full Name', hi: 'पूरा नाम', bn: 'পুরো নাম' },
+        donorAgeLabel: { en: 'Age', hi: 'आयु', bn: 'বয়স' },
+        donorBloodGroupLabel: { en: 'Blood Group', hi: 'रक्त समूह', bn: 'রক্তের গ্রুপ' },
+        donorLocationLabel: { en: 'Location (City)', hi: 'स्थान (शहर)', bn: 'অবস্থান (শহর)' },
+        donorContactLabel: { en: 'Contact No.', hi: 'संपर्क नंबर', bn: 'যোগাযোগ নং' },
+        selectGroupOption: { en: 'Select Group', hi: 'समूह चुनें', bn: 'গ্রুপ নির্বাচন করুন' },
+        registerBtn: { en: 'Register', hi: 'पंजीकरण करें', bn: 'নিবন্ধন করুন' },
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const screenContent = document.querySelector('.screen-content');
+      const menuBtn = document.querySelector('#menu-btn');
+      const userBtn = document.querySelector('#user-btn');
+      const slideOut = document.querySelector('#menu-panel');
+      const userSlideOut = document.querySelector('#user-panel');
+      const closeButtons = document.querySelectorAll('.close-button');
+      const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+      let reminders = JSON.parse(localStorage.getItem('microClinicReminders')) || [];
+      const chatbotFab = document.getElementById('chatbot-fab');
+      const chatbotWindow = document.getElementById('chatbot-window');
+      const chatbotMessages = document.getElementById('chatbot-messages');
+      const chatbotInputForm = document.getElementById('chatbot-input-form');
+      const chatbotInput = document.getElementById('chatbot-input');
+      const chatbotClearBtn = document.getElementById('chatbot-clear-btn');
+      const reminderModal = document.getElementById('reminder-modal-overlay');
+      const addReminderBtn = document.querySelector('.add-reminder-btn');
+      const cancelReminderBtn = reminderModal.querySelector('.modal-cancel-btn');
+      const reminderForm = document.getElementById('reminder-form');
+      const reminderList = document.querySelector('.user-slide-out .reminder-list');
+      const userSlideOutPanel = document.querySelector('.user-slide-out');
+      const editProfileBtn = document.querySelector('.edit-profile-btn');
+      const profileEditForm = document.querySelector('#profile-edit-form');
+      const cancelProfileEditBtn = document.querySelector('#cancel-profile-edit');
+      const displayName = document.querySelector('#display-name'), displayAge = document.querySelector('#display-age'), displayGender = document.querySelector('#display-gender'), displayHeight = document.querySelector('#display-height'), displayWeight = document.querySelector('#display-weight');
+      const editName = document.querySelector('#edit-name'), editAge = document.querySelector('#edit-age'), editGender = document.querySelector('#edit-gender'), editHeight = document.querySelector('#edit-height'), editWeight = document.querySelector('#edit-weight');
+      const locationDisplay = document.querySelector('.location-display');
+      const hospitalList = document.querySelector('.slide-out .hospital-list');
+      let hasFetchedLocation = false;
+
+      const changeLanguage = (lang) => { if (!lang || !languageData) return; document.documentElement.lang = lang; localStorage.setItem('preferredLanguage', lang); document.querySelectorAll('.lang-button').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang)); document.querySelectorAll('[data-key]').forEach(elem => { const key = elem.dataset.key; const translation = languageData[key]?.[lang] || languageData[key]?.['en']; if (translation !== undefined) { const span = elem.querySelector('span:not([data-key])'); if (span && !elem.classList.contains('location-display')) { elem.firstChild.textContent = translation.split(':')[0] + ': '; span.textContent = translation.split(' ')[1] || ''; } else { elem.textContent = translation; } } }); document.querySelectorAll('[data-title-key]').forEach(elem => { const key = elem.dataset.titleKey; if(languageData[key]?.[lang]) elem.title = languageData[key][lang]; }); document.querySelectorAll('[data-placeholder-key]').forEach(elem => { const key = elem.dataset.placeholderKey; if(languageData[key]?.[lang]) elem.placeholder = languageData[key][lang]; }); if (chatbotMessages.children.length <= 1) { chatbotMessages.innerHTML = ''; const initialGreeting = languageData.chatbotInitialGreeting[lang] || languageData.chatbotInitialGreeting.en; addMessage(initialGreeting, 'ai'); } };
+      const closeAllSlides = () => { slideOut.classList.remove('active'); userSlideOut.classList.remove('active'); if (userSlideOut.classList.contains('edit-mode')) userSlideOut.classList.remove('edit-mode'); screenContent.classList.remove('slide-active', 'user-slide-active'); }
+      const toggleChatbot = () => { screenContent.classList.toggle('chatbot-is-open'); chatbotWindow.classList.toggle('open'); chatbotFab.classList.toggle('open'); };
+      const addMessage = (text, sender) => { const messageElement = document.createElement('div'); messageElement.className = `message ${sender}-message`; const messageContent = document.createElement('div'); messageContent.className = 'message-content'; messageContent.textContent = text; messageElement.appendChild(messageContent); chatbotMessages.appendChild(messageElement); chatbotMessages.scrollTop = chatbotMessages.scrollHeight; };
+      const showTypingIndicator = () => { const indicatorWrapper = document.createElement('div'); indicatorWrapper.className = 'message ai-message typing-indicator-wrapper'; indicatorWrapper.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`; chatbotMessages.appendChild(indicatorWrapper); chatbotMessages.scrollTop = chatbotMessages.scrollHeight; };
+      const hideTypingIndicator = () => { const typingIndicator = chatbotMessages.querySelector('.typing-indicator-wrapper'); if (typingIndicator) typingIndicator.remove(); };
+      function openReminderModal() { reminderModal.classList.add('active'); screenContent.classList.add('modal-is-open'); }
+      function closeReminderModal() { reminderModal.classList.remove('active'); screenContent.classList.remove('modal-is-open'); reminderForm.reset(); }
+      function saveReminders() { localStorage.setItem('microClinicReminders', JSON.stringify(reminders)); }
+      function renderReminders() { reminderList.innerHTML = ''; if (reminders.length === 0) { const placeholder = document.createElement('p'); placeholder.className = 'list-placeholder'; placeholder.textContent = 'No reminders added yet.'; reminderList.appendChild(placeholder); return; } reminders.forEach(reminder => { const reminderEl = document.createElement('li'); reminderEl.className = 'reminder-item'; reminderEl.dataset.id = reminder.id; reminderEl.innerHTML = `<div class="reminder-info"><i class="fas fa-pills"></i><div class="reminder-text"><p class="med-name">${reminder.name}</p><p class="med-details">${reminder.times} - ${reminder.meal}</p></div></div><button class="delete-reminder-btn" title="Delete Reminder"><i class="fas fa-trash-alt"></i></button>`; reminderList.appendChild(reminderEl); }); }
+      function handleGeolocation() { if (hasFetchedLocation) return; locationDisplay.innerHTML = `<i class="fas fa-spinner fa-spin loading-spinner"></i> Finding location...`; hospitalList.innerHTML = `<li class="list-placeholder"><i class="fas fa-spinner fa-spin loading-spinner"></i> Loading hospitals...</li>`; setTimeout(() => { locationDisplay.innerHTML = `<i class="fas fa-map-marker-alt"></i> Location: Rourkela, Odisha`; const simulatedHospitals = [{ name: 'Ispat General Hospital', distance: '3.2km' },{ name: 'Jaiprakash Hospital & Research Centre', distance: '4.8km' },{ name: 'Shanti Memorial Hospital', distance: '5.5km' },{ name: 'CSL Hospital', distance: '6.5km' }]; hospitalList.innerHTML = ''; simulatedHospitals.forEach(h => { const li = document.createElement('li'); li.textContent = `${h.name}: ${h.distance}`; hospitalList.appendChild(li); }); hasFetchedLocation = true; }, 1200); }
+      
+      menuBtn.addEventListener('click', (e) => { e.preventDefault(); closeAllSlides(); slideOut.classList.add('active'); screenContent.classList.add('slide-active'); handleGeolocation(); });
+      userBtn.addEventListener('click', (e) => { e.preventDefault(); closeAllSlides(); userSlideOut.classList.add('active'); screenContent.classList.add('user-slide-active'); });
+      closeButtons.forEach(button => button.addEventListener('click', closeAllSlides));
+      document.querySelector('.language-selector').addEventListener('click', (e) => { if (e.target.matches('.lang-button')) changeLanguage(e.target.dataset.lang); });
+      document.body.addEventListener('click', (e) => { const link = e.target.closest('a.smooth-redirect'); if (link) { e.preventDefault(); screenContent.style.opacity = '0'; setTimeout(() => window.location.href = link.href, 400); } });
+      chatbotFab.addEventListener('click', toggleChatbot);
+      chatbotInputForm.addEventListener('submit', e => { e.preventDefault(); const userText = chatbotInput.value.trim(); if (userText === '') return; addMessage(userText, 'user'); chatbotInput.value = ''; showTypingIndicator(); setTimeout(() => { hideTypingIndicator(); addMessage('I am a demo AI. How can I assist you?', 'ai'); }, 1500); });
+      chatbotClearBtn.addEventListener('click', () => { chatbotMessages.innerHTML = ''; const greeting = languageData.chatbotInitialGreeting[localStorage.getItem('preferredLanguage') || 'en']; addMessage(greeting, 'ai'); });
+      addReminderBtn.addEventListener('click', openReminderModal);
+      cancelReminderBtn.addEventListener('click', closeReminderModal);
+      reminderModal.addEventListener('click', (e) => { if(e.target === reminderModal) closeReminderModal(); });
+      reminderForm.addEventListener('submit', (e) => { e.preventDefault(); reminders.push({ id: Date.now(), name: document.getElementById('med-name').value.trim(), times: document.getElementById('med-times').value.trim(), meal: document.getElementById('med-meal').value, }); saveReminders(); renderReminders(); closeReminderModal(); });
+      reminderList.addEventListener('click', (e) => { const deleteBtn = e.target.closest('.delete-reminder-btn'); if (deleteBtn) { const reminderItem = deleteBtn.closest('.reminder-item'); if (reminderItem) { reminders = reminders.filter(r => r.id !== parseInt(reminderItem.dataset.id, 10)); saveReminders(); renderReminders(); } } });
+      editProfileBtn.addEventListener('click', () => { editName.value = displayName.textContent; editAge.value = displayAge.textContent; editGender.value = displayGender.textContent; editHeight.value = displayHeight.textContent; editWeight.value = displayWeight.textContent; userSlideOutPanel.classList.add('edit-mode'); });
+      cancelProfileEditBtn.addEventListener('click', () => userSlideOutPanel.classList.remove('edit-mode'));
+      profileEditForm.addEventListener('submit', (e) => { e.preventDefault(); displayName.textContent = editName.value; displayAge.textContent = editAge.value; displayGender.textContent = editGender.value; displayHeight.textContent = editHeight.value; displayWeight.textContent = editWeight.value; userSlideOutPanel.classList.remove('edit-mode'); });
+      
+      let donors = []; 
+      const bloodBankHome = document.getElementById('blood-bank-home'), bloodListView = document.getElementById('blood-list-view');
+      const checkAvailabilityBtn = document.getElementById('check-availability-btn'), registerDonorBtn = document.getElementById('register-donor-btn');
+      const backToListBtn = bloodListView.querySelector('.back-button');
+      const donorRegisterModal = document.getElementById('donor-register-modal'), donorRegisterForm = document.getElementById('donor-register-form');
+      const donorList = document.getElementById('donor-list'), bloodGroupFilter = document.getElementById('blood-group-filter-select');
+      const donorEditModal = document.getElementById('donor-edit-modal'), donorEditForm = document.getElementById('donor-edit-form');
+
+      const initializeSampleDonors = () => { const storedDonors = localStorage.getItem('bloodDonors'); donors = storedDonors ? JSON.parse(storedDonors) : [ { name: 'Amit Singh', age: '28', group: 'O+', location: 'Rourkela', contact: '9876543210' }, { name: 'Priya Sharma', age: '24', group: 'A+', location: 'Bhubaneswar', contact: '9876543211' }, { name: 'Rohan Mehra', age: '32', group: 'B+', location: 'Rourkela', contact: '9876543212' }, { name: 'Sunita Rao', age: '29', group: 'AB+', location: 'Sambalpur', contact: '9876543213' } ]; saveDonors(); };
+      const saveDonors = () => localStorage.setItem('bloodDonors', JSON.stringify(donors));
+      const renderDonors = (filter = '') => {
+        donorList.innerHTML = '';
+        const filteredDonors = filter ? donors.filter(d => d.group === filter) : donors;
+        if (filteredDonors.length === 0) {
+            donorList.innerHTML = `<div class="no-donors-message"><i class="fas fa-tint-slash"></i><p>${filter ? `No donors found for group ${filter}.` : `No donors registered yet.`}</p></div>`; return;
+        }
+        donors.forEach((donor, index) => {
+            if (filter && donor.group !== filter) return;
+            const li = document.createElement('li');
+            li.className = 'donor-card';
+            li.dataset.index = index;
+            li.innerHTML = `<div class="donor-blood-group">${donor.group}</div><div class="donor-info"><p class="donor-name"><strong>${donor.name}</strong> (${donor.age} yrs)</p><p class="donor-location"><i class="fas fa-map-marker-alt"></i> ${donor.location}</p><p class="donor-contact"><a href="tel:${donor.contact}"><i class="fas fa-phone-alt"></i>Call Donor</a></p></div><div class="donor-card-actions"><button class="edit-donor-btn" title="Edit Donor"><i class="fas fa-pencil-alt"></i></button></div>`;
+          donorList.appendChild(li);
+        });
+      };
+      
+      const openDonorEditModal = (index) => {
+          const donor = donors[index]; if (!donor) return;
+          document.getElementById('edit-donor-index').value = index; document.getElementById('edit-donor-name').value = donor.name; document.getElementById('edit-donor-age').value = donor.age; document.getElementById('edit-donor-blood-group').value = donor.group; document.getElementById('edit-donor-location').value = donor.location; document.getElementById('edit-donor-contact').value = donor.contact;
+          donorEditModal.classList.add('active'); screenContent.classList.add('modal-is-open');
+      };
+      const closeDonorEditModal = () => { donorEditModal.classList.remove('active'); screenContent.classList.remove('modal-is-open'); donorEditForm.reset(); };
+      const openDonorRegisterModal = () => { donorRegisterModal.classList.add('active'); screenContent.classList.add('modal-is-open'); }
+      const closeDonorRegisterModal = () => { donorRegisterModal.classList.remove('active'); screenContent.classList.remove('modal-is-open'); donorRegisterForm.reset(); }
+      const showListView = () => { bloodBankHome.classList.add('hidden'); bloodListView.classList.add('active'); renderDonors(bloodGroupFilter.value); }
+      const showHomeView = () => { bloodBankHome.classList.remove('hidden'); bloodListView.classList.remove('active'); }
+      
+      checkAvailabilityBtn.addEventListener('click', showListView);
+      backToListBtn.addEventListener('click', showHomeView);
+      registerDonorBtn.addEventListener('click', openDonorRegisterModal);
+      donorRegisterModal.querySelector('.modal-cancel-btn').addEventListener('click', closeDonorRegisterModal);
+      donorRegisterModal.addEventListener('click', e => { if (e.target === donorRegisterModal) closeDonorRegisterModal(); });
+      donorList.addEventListener('click', e => { const editBtn = e.target.closest('.edit-donor-btn'); if (editBtn) { const donorCard = editBtn.closest('.donor-card'); openDonorEditModal(donorCard.dataset.index); } });
+      donorEditModal.querySelector('.modal-cancel-btn').addEventListener('click', closeDonorEditModal);
+      donorEditModal.addEventListener('click', e => { if (e.target === donorEditModal) closeDonorEditModal(); });
+      donorEditForm.addEventListener('submit', (e) => { e.preventDefault(); const index = document.getElementById('edit-donor-index').value; if (index === null || index === undefined) return; donors[index] = { name: document.getElementById('edit-donor-name').value.trim(), age: document.getElementById('edit-donor-age').value, group: document.getElementById('edit-donor-blood-group').value, location: document.getElementById('edit-donor-location').value.trim(), contact: document.getElementById('edit-donor-contact').value.trim() }; saveDonors(); closeDonorEditModal(); renderDonors(bloodGroupFilter.value); });
+      donorRegisterForm.addEventListener('submit', (e) => { e.preventDefault(); donors.unshift({ name: document.getElementById('donor-name').value.trim(), age: document.getElementById('donor-age').value, group: document.getElementById('donor-blood-group').value, location: document.getElementById('donor-location').value.trim(), contact: document.getElementById('donor-contact').value.trim() }); saveDonors(); closeDonorRegisterModal(); alert('Thank you for registering as a blood donor!'); });
+      bloodGroupFilter.addEventListener('change', () => renderDonors(bloodGroupFilter.value));
+      
+      changeLanguage(savedLang);
+      renderReminders();
+      initializeSampleDonors();
+    });
+  </script>
+</body>
+</html>

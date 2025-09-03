@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediScanAI - Medicine Records</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- Full CSS copied and merged from reference with new additions for this page -->
+  <style>
+      :root {
+        /* --- Blue and Orange Theme inspired by the logo --- */
+        --accent-color: #ff7618;
+        --accent-dark: #e66000;
+        --accent-glow: rgba(255, 118, 24, 0.35);
+        --interaction-color: #1497d7;
+        --interaction-dark: #107ab5;
+        --interaction-glow: rgba(20, 151, 215, 0.4);
+        --page-bg: #e8f4fa;
+        --phone-body: #f7f9fa;
+        --text-primary: #1a2b34;
+        --text-secondary: #5a6a72;
+        --white-color: #ffffff;
+        --border-color: #dce4e8;
+        --danger-color: #e53935;
+        --danger-dark: #c62828;
+        --danger-glow: rgba(229, 57, 53, 0.35);
+        --border-radius-phone: 40px;
+        --spacing-unit: 8px;
+        --transition-fast: 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --transition-smooth: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --light-grey: #f0f2f5;
+        --medium-grey: #c0c8cc;
+        --dark-grey: #555c61;
+        --shadow-light: rgba(0, 0, 0, 0.1);
+        --shadow-medium: rgba(0, 0, 0, 0.15);
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { height: 100%; width: 100%; font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      body { background-color: var(--page-bg); display: flex; align-items: center; justify-content: center; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; padding: 20px 0; }
+      .smartphone { width: 360px; height: 100%; max-height: 700px; background-color: var(--white-color); border: none; padding: 0; border-radius: var(--border-radius-phone); box-shadow: 0 25px 60px -12px rgba(0,0,0,0.25), 0 0px 15px rgba(0,0,0,0.1); display: flex; overflow: hidden; }
+      .screen-content { width: 100%; height: 100%; background-color: var(--phone-body); border-radius: var(--border-radius-phone); display: flex; flex-direction: column; overflow: hidden; position: relative; transition: box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease-out; }
+      .app-header, .app-main, .app-footer, .chatbot-wrapper, .slide-out, .user-slide-out { transition: filter 0.3s ease; }
+      .screen-content.modal-is-open > *:not(.record-modal-overlay):not(.reminder-modal-overlay),
+      .screen-content.chatbot-is-open > *:not(.chatbot-wrapper),
+      .screen-content.slide-active > *:not(.slide-out),
+      .screen-content.user-slide-active > *:not(.user-slide-out) { filter: blur(3px) saturate(0.9); pointer-events: none; }
+      .app-header { display: flex; justify-content: space-between; align-items: center; padding: calc(var(--spacing-unit) * 3) calc(var(--spacing-unit) * 2.5); flex-shrink: 0; position: relative; z-index: 20; }
+      .app-main { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 0 calc(var(--spacing-unit) * 2.5); overflow-y: auto; scrollbar-width: none; }
+      .app-main::-webkit-scrollbar { display: none; }
+      .app-footer { flex-shrink: 0; display: flex; justify-content: space-around; align-items: center; padding: var(--spacing-unit) calc(var(--spacing-unit) * 2.5) calc(var(--spacing-unit) * 2.5); background: linear-gradient(to top, var(--phone-body) 30%, transparent); margin-top: auto; position: relative; z-index: 20; }
+      
+      /* === UPDATED: Icon Button Styles for consistency across all pages === */
+      .icon-btn { background: transparent; border: none; cursor: pointer; padding: var(--spacing-unit); border-radius: 50%; display: inline-flex; transition: all var(--transition-fast); -webkit-tap-highlight-color: transparent; text-decoration: none; }
+      .icon-btn svg, .icon-btn i { width: 28px; height: 28px; font-size: 24px; color: var(--text-secondary); line-height: 28px; text-align: center; transition: all var(--transition-fast); }
+      /* Style for NON-ACTIVE button hover */
+      .icon-btn:not(.icon-btn--primary):not(.icon-btn--emergency):not(.active):hover { transform: translateY(-3px); background-color: #e2eef3; }
+      .icon-btn:not(.icon-btn--primary):not(.icon-btn--emergency):not(.active):hover svg,
+      .icon-btn:not(.icon-btn--primary):not(.icon-btn--emergency):not(.active):hover i { color: var(--interaction-dark); }
+      /* Style for ACTIVE button */
+      .icon-btn.active { background-color: rgba(20, 151, 215, 0.1); }
+      .icon-btn.active svg, .icon-btn.active i { color: var(--interaction-color); }
+      /* Style for ACTIVE button hover */
+      .icon-btn.active:hover { background-color: rgba(20, 151, 215, 0.18); transform: translateY(-2px); }
+      /* Style for Emergency button */
+      .icon-btn--emergency { background-color: var(--danger-color); box-shadow: 0 4px 15px var(--danger-glow); }
+      .icon-btn--emergency i { color: var(--white-color); }
+      .icon-btn--emergency:hover { background-color: var(--danger-dark); transform: translateY(-4px) scale(1.05); box-shadow: 0 8px 20px var(--danger-glow); }
+
+
+      @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+      /* --- Page-Specific Styles: Medicine Record --- */
+      .page-header { width: 100%; text-align: left; padding: 5px 0 15px; }
+      .page-header h1 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.8em; font-weight: 700; color: var(--text-primary); margin:0; }
+      .record-list-container { width: 100%; display: flex; flex-direction: column; gap: 14px; padding-bottom: 80px; }
+      .record-item { background-color: var(--white-color); border-radius: 16px; padding: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(26, 43, 52, 0.06); transition: transform var(--transition-fast), box-shadow var(--transition-fast), opacity 0.4s ease, height 0.4s ease, padding 0.4s ease, margin 0.4s ease, border-width 0.4s ease; opacity: 0; animation: fadeInUp 0.5s ease-out forwards; will-change: transform, opacity; position: relative; }
+      .record-item:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(20, 151, 215, 0.12); }
+      .record-item .med-image { width: 60px; height: 60px; border-radius: 12px; object-fit: cover; background-color: var(--light-grey); flex-shrink: 0; }
+      .record-item .med-image-placeholder { width: 60px; height: 60px; border-radius: 12px; background-color: var(--light-grey); display: flex; align-items: center; justify-content: center; font-size: 1.5em; color: var(--medium-grey); flex-shrink: 0; }
+      .record-info { display: flex; flex-direction: column; flex-grow: 1; }
+      .record-info h3 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.1em; font-weight: 600; color: var(--text-primary); margin: 0 0 4px; }
+      .record-info p { font-size: 0.85em; color: var(--text-secondary); margin: 0; }
+      .record-list-container .list-placeholder { text-align: center; padding: 40px 20px; color: var(--text-secondary); font-size: 0.95em; }
+      
+      .record-item.removing {
+        opacity: 0 !important;
+        transform: translateX(50px) scale(0.9);
+        height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        margin-bottom: 0;
+        border-width: 0;
+        overflow: hidden;
+      }
+      
+      .add-record-fab {
+        position: absolute;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--danger-color), var(--danger-dark));
+        color: white;
+        border-radius: 50%;
+        border: none;
+        font-size: 28px;
+        line-height: 56px;
+        text-align: center;
+        cursor: pointer;
+        box-shadow: 0 6px 20px var(--danger-glow);
+        transition: all 0.3s ease;
+        z-index: 50;
+      }
+      .add-record-fab:hover {
+        transform: translateX(-50%) scale(1.1);
+        box-shadow: 0 10px 30px var(--danger-glow);
+      }
+      
+      .screen-content.slide-active .add-record-fab,
+      .screen-content.user-slide-active .add-record-fab {
+          opacity: 0;
+          transform: translateX(-50%) scale(0.8);
+          pointer-events: none;
+      }
+      .chatbot-fab { z-index: 1000 !important; }
+
+      .delete-record-btn {
+          position: absolute;
+          top: 8px;
+          right: 10px;
+          background-color: var(--light-grey);
+          border: none;
+          border-radius: 50%;
+          width: 24px;
+          height: 24px;
+          line-height: 24px;
+          text-align: center;
+          font-size: 16px;
+          font-weight: bold;
+          color: var(--text-secondary);
+          cursor: pointer;
+          opacity: 0;
+          transform: scale(0.8);
+          transition: all 0.2s ease;
+          z-index: 5;
+      }
+      .record-item:hover .delete-record-btn {
+          opacity: 1;
+          transform: scale(1);
+      }
+      .delete-record-btn:hover {
+          background-color: var(--danger-color);
+          color: white;
+          transform: scale(1.1);
+      }
+
+      /* --- Add Record Modal Styles --- */
+      .record-modal-overlay { position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.5); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+      .record-modal-overlay.active { opacity: 1; visibility: visible; }
+      .record-modal-content { background-color: white; padding: 25px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); width: 90%; max-width: 300px; transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+      .record-modal-overlay.active .record-modal-content { transform: scale(1); }
+      .record-modal-content h3 { font-family: 'Bricolage Grotesque', sans-serif; margin-top: 0; margin-bottom: 20px; color: var(--interaction-color); text-align: center; font-size: 1.3em; }
+      .form-group { width: 100%; text-align: left; margin-bottom: 15px; }
+      .form-group label { display: block; font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+      .themed-input, .themed-select { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); background-color: var(--white-color); border-radius: 12px; font-size: 15px; color: var(--text-primary); font-family: 'Manrope', sans-serif; transition: border-color var(--transition-fast), box-shadow var(--transition-fast); }
+      .themed-input:focus, .themed-select:focus { outline: none; border-color: var(--interaction-color); box-shadow: 0 0 0 3px var(--interaction-glow); }
+      .patient-id-display { background-color: var(--light-grey); padding: 10px 14px; border-radius: 12px; font-weight: 600; color: var(--text-secondary); }
+      .file-upload-label { display: flex; align-items: center; justify-content: center; width: 100%; padding: 25px 14px; border: 2px dashed var(--border-color); background-color: #fcfdff; border-radius: 12px; cursor: pointer; transition: all var(--transition-fast); text-align: center; }
+      .file-upload-label:hover { border-color: var(--interaction-color); background-color: #f5faff; }
+      .file-upload-label i { margin-bottom: 8px; color: var(--interaction-color); font-size: 1.8em; }
+      .file-upload-label-text { font-size: 0.9em; font-weight: 500; color: var(--text-secondary); }
+      #med-image-input { display: none; }
+      #image-preview { margin-top: 15px; display: none; text-align: center; }
+      #image-preview img { max-width: 80px; max-height: 80px; border-radius: 8px; object-fit: cover; box-shadow: 0 2px 8px var(--shadow-light); }
+      .modal-buttons { display: flex; gap: 10px; margin-top: 25px; }
+      .modal-buttons button { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid transparent; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 0.95em; cursor: pointer; transition: all 0.2s ease; }
+      .modal-save-btn { background-color: var(--interaction-color); color: white; border-color: var(--interaction-dark); }
+      .modal-save-btn:hover { background-color: var(--interaction-dark); }
+      .modal-cancel-btn { background-color: #f1f1f1; color: var(--dark-grey); }
+      .modal-cancel-btn:hover { background-color: #e0e0e0; }
+
+      /* --- FULL Styles from Reference (Chatbot, Slide Panels etc.) --- */
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes scaleUp { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+      .screen-content.user-slide-active .chatbot-wrapper, .screen-content.slide-active .chatbot-wrapper { display: none; }
+      .chatbot-wrapper{z-index:100}.chatbot-fab{position:absolute;bottom:85px;right:20px;width:50px;height:50px;background-color:var(--interaction-color);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 5px 20px var(--interaction-glow);transition:transform .2s ease,box-shadow .2s ease;z-index:1000}.chatbot-fab:hover{transform:scale(1.1);box-shadow:0 8px 25px var(--interaction-glow)}.chatbot-fab svg{position:absolute;width:28px;height:28px;stroke:var(--white-color);stroke-width:2;transition:transform .3s ease,opacity .3s ease}.chatbot-fab .icon-close{transform:rotate(-90deg) scale(0);opacity:0}.chatbot-fab.open .icon-chat{transform:rotate(90deg) scale(0);opacity:0}.chatbot-fab.open .icon-close{transform:rotate(0) scale(1);opacity:1}.chatbot-window{position:absolute;bottom:145px;right:20px;width:300px;height:400px;background-color:var(--white-color);border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.15);display:flex;flex-direction:column;overflow:hidden;transform-origin:bottom right;transform:translateY(20px) scale(.95);opacity:0;visibility:hidden;transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s ease,visibility .3s;z-index:999}.chatbot-window.open{transform:translateY(0) scale(1);opacity:1;visibility:visible}.chatbot-header{padding:16px;background-color:var(--phone-body);border-bottom:1px solid var(--border-color);flex-shrink:0}.chatbot-header h3{font-size:16px;font-weight:700;color:var(--text-primary)}.chatbot-messages{flex-grow:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}.chatbot-messages::-webkit-scrollbar{width:5px}.chatbot-messages::-webkit-scrollbar-thumb{background:var(--border-color);border-radius:10px}.chatbot-messages::-webkit-scrollbar-track{background:transparent}.message{display:flex;max-width:80%;font-size:14px;line-height:1.5;animation:message-in .3s ease forwards}@keyframes message-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.message-content{padding:10px 14px;border-radius:18px}.ai-message{align-self:flex-start}.ai-message .message-content{background-color:var(--phone-body);color:var(--text-primary);border-top-left-radius:4px}.user-message{align-self:flex-end}.user-message .message-content{background-color:var(--interaction-color);color:var(--white-color);border-top-right-radius:4px}.chatbot-input-form{display:flex;align-items:center;padding:10px;border-top:1px solid var(--border-color)}.chatbot-tool-btn{width:36px;height:36px;background:transparent;border:none;border-radius:50%;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background-color var(--transition-fast);margin-right:6px}#chatbot-input{flex-grow:1;border:none;outline:none;background:transparent;padding:10px;font-size:14px;color:var(--text-primary);font-family:inherit}#chatbot-send-btn{width:36px;height:36px;background:var(--interaction-color);border:none;border-radius:50%;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background-color var(--transition-fast)}#chatbot-send-btn:hover{background:var(--interaction-dark)}#chatbot-send-btn svg{width:18px;height:18px;stroke:var(--white-color);stroke-width:2.5}
+      .slide-out,.user-slide-out{position:absolute;top:0;left:0;width:100%;height:100%;background-color:var(--white-color);transition:transform .4s cubic-bezier(.25,.46,.45,.94);padding:30px 20px 20px;box-sizing:border-box;text-align:left;overflow-y:auto;will-change:transform;border-radius:var(--border-radius-phone);z-index:25;font-family:'Bricolage Grotesque',sans-serif}.slide-out{transform:translateX(-100%)}.user-slide-out{transform:translateX(100%)}.slide-out.active{transform:translateX(0)}.user-slide-out.active{transform:translateX(0)}.slide-out h2,.user-slide-out h2{font-size:1.4em;margin-top:10px;margin-bottom:15px;color:var(--interaction-color);text-align:left;animation:fadeInUp .5s ease-out .1s both}.slide-out h3,.user-slide-out h3{font-size:1.15em;margin-top:18px;margin-bottom:8px;text-align:left;color:var(--interaction-dark);animation:fadeInUp .5s ease-out .2s both}.close-button{position:absolute;top:15px;right:18px;font-size:1.7em;color:var(--medium-grey);cursor:pointer;background:0 0;border:none;outline:0;transition:color .2s ease,transform .2s ease;z-index:26;padding:5px;line-height:1}.close-button:hover{color:var(--dark-grey);transform:rotate(90deg) scale(1.1)}.location-display{display:flex;align-items:center;gap:6px;font-family:'Manrope',sans-serif;color:var(--text-secondary)}.hospital-list{list-style-type:none;padding-left:0;margin-top:10px;animation:fadeInUp .5s ease-out .4s both}.hospital-list li{margin-bottom:8px;text-align:left;padding-left:25px;position:relative;font-size:.9em;display:flex;align-items:center;color:var(--text-secondary)}.hospital-list li::before{content:"\f479";font-family:"Font Awesome 6 Free";font-weight:900;color:var(--interaction-color);position:absolute;left:0;top:50%;transform:translateY(-50%);font-size:1.1em}.settings-accordion{margin-top:20px;border-top:1px solid var(--border-color);border-bottom:1px solid var(--border-color);animation:fadeInUp .5s ease-out .3s both}.settings-accordion summary{font-size:1.15em;font-weight:500;color:var(--interaction-dark);padding:12px 0;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}.settings-accordion summary::-webkit-details-marker{display:none}.settings-accordion summary::after{content:'\f078';font-family:'Font Awesome 6 Free';font-weight:900;font-size:.8em;color:var(--medium-grey);transition:transform .2s ease-in-out}.settings-accordion[open] summary::after{transform:rotate(-180deg)}.language-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:5px;padding-bottom:15px}.lang-button{background-color:var(--light-grey);border:1px solid transparent;border-radius:8px;padding:6px 5px;font-family:'Bricolage Grotesque',sans-serif;font-size:.85em;font-weight:500;cursor:pointer;text-align:center;transition:all .2s ease-out;color:var(--dark-grey)}.lang-button:hover{background-color:#e0e4e8;transform:translateY(-1px)}.lang-button.active{background-color:var(--interaction-color);color:#fff;font-weight:600;border-color:var(--interaction-dark);box-shadow:0 2px 5px rgba(0,0,0,.1)}.user-profile-header{display:flex;align-items:center;margin-bottom:5px}.edit-profile-btn{background:0 0;border:none;color:var(--dark-grey);font-size:.9em;cursor:pointer;padding:6px;border-radius:50%;transition:background-color .2s ease,color .2s ease;line-height:1;margin-left:8px}.edit-profile-btn:hover{background-color:var(--light-grey);color:var(--interaction-color)}.user-info-display p{margin:8px 0;font-size:.9em;animation:none;color:var(--text-secondary)}.user-info-display p>strong{font-weight:600;margin-right:5px;color:var(--dark-grey)}#profile-edit-form{display:none;border-top:1px solid var(--border-color);padding-top:15px;margin-top:10px}.user-slide-out.edit-mode .user-info-display,.user-slide-out.edit-mode .user-profile-lower-content{display:none}.user-slide-out.edit-mode #profile-edit-form{display:block;animation:fadeIn .3s ease}.logout-button{background:rgba(20,151,215,.1);border-radius:20px;box-shadow:0 3px 10px rgba(0,0,0,.08);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);border:1px solid rgba(20,151,215,.15);padding:10px 22px;font-size:.95em;font-weight:500;color:var(--interaction-dark);cursor:pointer;transition:all .25s ease;margin-top:25px;width:fit-content;margin-left:auto;margin-right:auto;display:block}.logout-button:hover{background:rgba(20,151,215,.18);border-color:rgba(20,151,215,.25);transform:translateY(-2px);box-shadow:0 5px 15px rgba(0,0,0,.12)}.reminder-section { margin-top: 20px; text-align: left; padding: 12px 15px; background-color: rgba(232, 244, 250, 0.5); border-radius: 10px; border: 1px solid rgba(20, 151, 215, 0.1); animation: fadeIn 0.6s ease-out 0.3s both; }.reminder-header { display: flex; justify-content: space-between; align-items: center; }.add-reminder-btn { background-color: var(--interaction-color); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 1em; cursor: pointer; transition: all 0.2s ease; }.add-reminder-btn:hover { transform: scale(1.1) rotate(90deg); background-color: var(--interaction-dark); }.reminder-list { list-style: none; padding: 0; margin: 10px 0 0 0; }.reminder-list .list-placeholder { text-align: center; padding: 20px; color: var(--medium-grey); font-size: 0.9em; }.health-progress-section { margin-top: 20px; text-align: left; padding: 12px 15px; background-color: rgba(232, 244, 250, 0.5); border-radius: 10px; border: 1px solid rgba(20, 151, 215, 0.1); animation: fadeIn 0.6s ease-out 0.3s both; }.progress-bar { height: 10px; background-color: #e8e8e8; border-radius: 5px; margin-top: 0; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.08); }.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--interaction-color), #57b9e6); border-radius: 5px; transition: width 1.2s cubic-bezier(0.65, 0, 0.35, 1); }.day-labels { display: flex; justify-content: space-between; font-size: 0.7em; margin-top: 6px; color: #888; }
+      .reminder-modal-overlay { z-index: 1000; }.reminder-modal-overlay { position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.5); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }.reminder-modal-overlay.active { opacity: 1; visibility: visible; }.reminder-modal-content { background-color: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); width: 90%; max-width: 280px; transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }.reminder-modal-overlay.active .reminder-modal-content { transform: scale(1); }.reminder-modal-content h3 { margin-top: 0; margin-bottom: 15px; color: var(--interaction-color); text-align: center; font-size: 1.2em; }.reminder-modal-content .form-group { margin-bottom: 12px; }.reminder-modal-content .form-group label { font-family: 'Bricolage Grotesque', sans-serif; font-size: 0.85em; }.reminder-modal-content .form-group input, .reminder-modal-content .form-group select { border-radius: 8px; transition: border-color 0.2s ease, box-shadow 0.2s ease; width:100%; padding:9px 12px; font-size: 0.9em; border:1px solid var(--medium-grey)}.reminder-modal-content .form-group input:focus, .reminder-modal-content .form-group select:focus { outline: none; border-color: var(--interaction-color); box-shadow: 0 0 0 3px var(--interaction-glow); }.reminder-modal-buttons button { flex: 1; }
+      .reminder-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 10px; background-color: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); animation: scaleUp 0.4s ease-out forwards; position: relative; }.reminder-item:last-child { margin-bottom: 0; }.reminder-info { display: flex; align-items: center; }.reminder-item i.fa-pills { font-size: 1.3em; color: var(--interaction-color); margin-right: 12px; flex-shrink: 0; }.reminder-text { display: flex; flex-direction: column; }.reminder-text p { animation: none; margin: 0; line-height: 1.3; }.reminder-text .med-name { font-weight: 600; color: #444; font-size: 0.9em; }.reminder-text .med-details { font-size: 0.8em; color: #777; }.delete-reminder-btn { background: none; border: none; color: var(--medium-grey); cursor: pointer; font-size: 1.1em; padding: 5px; transition: color 0.2s ease, transform 0.2s ease; }.delete-reminder-btn:hover { color: var(--danger-color); transform: scale(1.15); }
+      .hospital-list .list-placeholder { color: var(--medium-grey); font-style: italic; } .loading-spinner { font-size: 0.8em; margin-right: 8px; }
+
+  </style>
+</head>
+<body>
+  <div class="smartphone">
+    <div class="screen-content">
+      
+      <header class="app-header">
+        <button class="icon-btn" aria-label="Menu" id="menu-btn" data-title-key="menuBtnTitle"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 28px; height: 28px;"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg></button>
+        <button class="icon-btn" aria-label="Profile" id="user-btn" data-title-key="userBtnTitle"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 28px; height: 28px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></button>
+      </header>
+
+      <main class="app-main">
+        <div class="page-header">
+            <h1 data-key="medRecordTitle">Medicine Record</h1>
+        </div>
+        <div class="record-list-container" id="record-list">
+            <!-- Dynamically inserted records will appear here -->
+        </div>
+      </main>
+      
+      <button class="add-record-fab" id="add-record-btn" title="Add New Record">+</button>
+
+      <footer class="app-footer">
+        <a href="/clinic" class="icon-btn" aria-label="Home" data-title-key="footerTitleHome">
+            <i class="fa-solid fa-house"></i>
+        </a>
+        <a href="/emergency" class="icon-btn icon-btn--emergency" aria-label="Medical Emergency" data-title-key="footerTitleEmergency">
+            <i class="fa-solid fa-truck-medical"></i>
+        </a>
+      </footer>
+
+      <!-- FULL CONTENT for Chatbot and Slide-Out Panels -->
+      <div class="chatbot-wrapper">
+        <div class="chatbot-fab" id="chatbot-fab" role="button" data-title-key="chatbotFabTitle" aria-label="Open AI Assistant">
+            <svg class="icon-chat" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8a8.5 8.5 0 0 1-7.6 4.7a8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8a8.5 8.5 0 0 1 4.7-7.6a8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            <svg class="icon-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </div>
+        <div class="chatbot-window" id="chatbot-window">
+          <div class="chatbot-header"><h3 data-key="chatbotTitle">AI Assistant</h3></div>
+          <div class="chatbot-messages" id="chatbot-messages"></div>
+          <form class="chatbot-input-form" id="chatbot-input-form">
+              <button type="button" id="chatbot-clear-btn" class="chatbot-tool-btn" aria-label="Clear Chat" data-title-key="chatbotClearTitle">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M3 21v-4a4 4 0 0 1 4 -4h5"></path><path d="M21 3a16 16 0 0 0 -12.8 10.2"></path><path d="M21 3a16 16 0 0 1 -10.2 12.8"></path><path d="M10.6 9a9 9 0 0 1 4.4 4.4"></path></svg>
+              </button>
+              <input type="text" id="chatbot-input" data-placeholder-key="chatbotPlaceholder" autocomplete="off">
+              <button id="chatbot-send-btn" type="submit" aria-label="Send Message" data-title-key="chatbotSendTitle">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              </button>
+          </form>
+        </div>
+      </div>
+      
+      <div class="slide-out" id="menu-panel">
+        <button class="close-button">×</button>
+        <h2 data-key="menuHello">Hello User!</h2>
+        <p class="location-display"><i class="fas fa-map-marker-alt"></i> Location: Rourkela, Odisha</p>
+        <details class="settings-accordion">
+            <summary data-key="settingsTitle">Settings</summary>
+            <div class="language-selector">
+                <button class="lang-button" data-lang="en">English</button><button class="lang-button" data-lang="hi">हिंदी</button><button class="lang-button" data-lang="bn">বাংলা</button><button class="lang-button" data-lang="te">తెలుగు</button><button class="lang-button" data-lang="mr">मराठी</button><button class="lang-button" data-lang="ta">தமிழ்</button><button class="lang-button" data-lang="ur">اردو</button><button class="lang-button" data-lang="gu">ગુજરાતી</button><button class="lang-button" data-lang="kn">ಕನ್ನಡ</button><button class="lang-button" data-lang="or">ଓଡ଼ିଆ</button><button class="lang-button" data-lang="ml">മലയാളം</button><button class="lang-button" data-lang="pa">ਪੰਜਾਬੀ</button><button class="lang-button" data-lang="as">অসমীয়া</button>
+            </div>
+        </details>
+        <h3 data-key="menuHospitalsTitle">Nearby Hospitals</h3>
+        <ul class="hospital-list"></ul>
+      </div>
+
+      <!-- === UPDATED User Panel === -->
+      <div class="user-slide-out" id="user-panel">
+          <button class="close-button">×</button>
+          <div class="user-profile-header">
+              <h2 data-key="profileTitle">User Profile</h2>
+              <button class="edit-profile-btn" data-title-key="editProfileTitle"><i class="fas fa-pencil-alt"></i></button>
+          </div>
+          <div class="user-info-display">
+              <p><strong data-key="profileUserIdLabel">User Id:</strong> <span>JEEV3317</span></p><p><strong data-key="profileNameLabel">Name:</strong> <span id="display-name">Sita Kumari</span></p><p><strong data-key="profileAgeLabel">Age:</strong> <span id="display-age">22</span> <span data-key="yrUnit">yr</span></p><p><strong data-key="profileGenderLabel">Gender:</strong> <span id="display-gender">Female</span></p><p><strong data-key="profileHeightLabel">Height:</strong> <span id="display-height">173</span> <span data-key="cmUnit">cm</span></p><p><strong data-key="profileWeightLabel">Weight:</strong> <span id="display-weight">71</span> <span data-key="kgUnit">kg</span></p>
+          </div>
+          <form id="profile-edit-form">
+              <div class="form-group"><label for="edit-name" data-key="profileNameLabel">Name</label><input type="text" id="edit-name" required class="themed-input"></div><div class="form-group"><label for="edit-age" data-key="profileAgeLabel">Age</label><input type="number" id="edit-age" required class="themed-input"></div><div class="form-group"><label for="edit-gender" data-key="profileGenderLabel">Gender</label><select id="edit-gender" required class="themed-select"><option value="Female">Female</option><option value="Male">Male</option><option value="Other">Other</option></select></div><div class="form-group"><label for="edit-height" data-key="profileHeightLabelFull">Height (cm)</label><input type="number" id="edit-height" required class="themed-input"></div><div class="form-group"><label for="edit-weight" data-key="profileWeightLabelFull">Weight (kg)</label><input type="number" id="edit-weight" required class="themed-input"></div><div class="modal-buttons"><button type="button" id="cancel-profile-edit" class="modal-cancel-btn" data-key="cancelBtn">Cancel</button><button type="submit" class="modal-save-btn" data-key="saveBtn">Save</button></div>
+          </form>
+          <div class="user-profile-lower-content">
+              <div class="reminder-section"><div class="reminder-header"><h3 data-key="profileReminders" style="margin:0;">Reminders</h3><button class="add-reminder-btn" title="Add Reminder">+</button></div><ul class="reminder-list"></ul></div>
+              <div class="health-progress-section"><h3 data-key="profileProgress">Your Health Progress (Week)</h3><div class="progress-bar"><div class="progress-bar-fill" style="width: 65%;"></div></div><div class="day-labels"><span data-key="dayMon">Mon</span><span data-key="dayTue">Tue</span><span data-key="dayWed">Wed</span><span data-key="dayThu">Thu</span><span data-key="dayFri">Fri</span><span data-key="daySat">Sat</span><span data-key="daySun">Sun</span></div></div>
+              <form method="post" action="{{ url_for('logout') }}"><button type="submit" class="logout-button" data-key="logoutButton">Logout</button></form>
+          </div>
+      </div>
+      
+      <!-- === UPDATED Reminder Modal === -->
+      <div class="reminder-modal-overlay">
+          <div class="reminder-modal-content">
+              <h3 data-key="addReminderTitle">Add Medicine Reminder</h3>
+              <form id="reminder-form">
+                  <div class="form-group"><label for="reminder-med-name" data-key="medNameLabel">Medicine Name</label><input type="text" id="reminder-med-name" required></div>
+                  <div class="form-group"><label for="med-times" data-key="medTimesLabel">Times (e.g., 08:00, 22:00)</label><input type="text" id="med-times" placeholder="Comma separated, 24h format" required></div>
+                  <div class="form-group"><label for="med-meal" data-key="medMealLabel">Meal</label><select id="med-meal" required><option value="After Food">After Food</option><option value="Before Food">Before Food</option></select></div>
+                  <div class="modal-buttons"><button type="button" class="modal-cancel-btn" data-key="cancelBtn">Cancel</button><button type="submit" class="modal-save-btn" data-key="saveBtn">Save</button></div>
+              </form>
+          </div>
+      </div>
+      
+      <!-- Modal for this page's functionality -->
+      <div class="record-modal-overlay" id="record-modal">
+          <div class="record-modal-content">
+              <h3 data-key="addRecordModalTitle">Add New Record</h3>
+              <form id="record-form">
+                  <div class="form-group"> <label data-key="profileUserIdLabel">Patient Id</label> <div class="patient-id-display">JEEV3317</div> </div>
+                  <div class="form-group"> <label for="med-name" data-key="medNameModalLabel">Name of Medicine / Saline / Injection</label> <input type="text" id="med-name" required class="themed-input" placeholder="e.g., Paracetamol 500mg"> </div>
+                  <div class="form-group"> <label data-key="medImageModalLabel">Image of Item</label> <input type="file" id="med-image-input" accept="image/*"> <label for="med-image-input" class="file-upload-label"> <div style="display: flex; flex-direction: column; align-items: center;"> <i class="fas fa-camera"></i> <span class="file-upload-label-text" data-key="uploadPhotoLabel">Click to upload (Optional)</span> </div> </label> <div id="image-preview"></div> </div>
+                  <div class="modal-buttons"> <button type="button" class="modal-cancel-btn" data-key="cancelBtn">Cancel</button> <button type="submit" class="modal-save-btn" data-key="saveBtn">Save</button> </div>
+              </form>
+          </div>
+      </div>
+    </div>
+  </div>
+  
+   <script>
+    // FULLY MERGED AND UPDATED SCRIPT
+    const languageData = {
+        medRecordTitle: { en: 'Medicine Record', hi: 'दवा रिकॉर्ड' },
+        medRecordPlaceholder: { en: "No records added yet. Tap the '+' button to add one.", hi: 'अभी तक कोई रिकॉर्ड नहीं जोड़ा गया है। जोड़ने के लिए '+' बटन पर टैप करें।' },
+        addRecordModalTitle: { en: 'Add New Record', hi: 'नया रिकॉर्ड जोड़ें' },
+        medNameModalLabel: { en: 'Name of Medicine / Saline / Injection', hi: 'दवा / सलाइन / इंजेक्शन का नाम' },
+        medImageModalLabel: { en: 'Image of Item', hi: 'वस्तु का चित्र' },
+        footerTitleHome: { en: 'Home', hi: 'होम', bn: 'হোম' },
+        footerTitleEmergency: { en: 'Medical Emergency', hi: 'आपात चिकित्सा', bn: 'চিকিৎসা জরুরী' },
+        menuBtnTitle: { en: 'Menu', hi: 'मेन्यू', bn: 'মেনু', te: 'మెను', mr: 'मेन्यू', ta: 'மெनु', ur: 'مینو', gu: 'મેનુ', kn: 'మెను', or: 'ମେନୁ', ml: 'മെനു', pa: 'ਮੀਨੂ', as: 'মেণু' },
+        userBtnTitle: { en: 'Profile', hi: 'प्रोफ़ाइल', bn: 'प्रੋফাইল', te: 'ప్రొఫైల్', mr: 'प्रोफाइल', ta: 'சுயவிவரம்', ur: 'پروفائل', gu: 'પ્રોફાઇલ', kn: 'ప్రೊಫೈల్', or: 'ପ੍ਰୋଫାଇଲ୍', ml: 'പ്രൊഫൈൽ', pa: 'ਪ੍ਰੋਫਾਈਲ', as: 'প্ৰফাইল' },
+        chatbotFabTitle: { en: 'Open AI Assistant', hi: 'एआई सहायक खोलें', bn: 'এআই অ্যাসিস্ট্যান্ট খুলুন' },
+        chatbotTitle: { en: 'AI Assistant', hi: 'एआई सहायक', bn: 'এআই অ্যাসিস্ট্যান্ট' },
+        chatbotPlaceholder: { en: 'Ask anything...', hi: 'कुछ भी पूछें...', bn: 'কিছু জিজ্ঞাসা করুন...' },
+        chatbotClearTitle: { en: 'Clear Chat', hi: 'चैट साफ़ करें', bn: 'চ্যাট পরিষ্কার করুন' },
+        chatbotSendTitle: { en: 'Send Message', hi: 'संदेश भेजें', bn: 'বার্তা পাঠান' },
+        chatbotInitialGreeting: { en: 'Hello! How can I assist you today?', hi: 'नमस्ते! मैं आज आपकी कैसे सहायता कर सकता हूँ?' },
+        menuHello: { en: 'Hello User!', hi: 'नमस्ते उपयोगकर्ता!', bn: 'নমস্কার ব্যবহারকারী!' },
+        settingsTitle: { en: 'Settings', hi: 'सेटिंग्स', bn: 'সেটিংস' },
+        menuHospitalsTitle: { en: 'Nearby Hospitals', hi: 'आस-पास के अस्पताल', bn: 'কাছাকাছি হাসপাতাল' },
+        profileTitle: { en: 'User Profile', hi: 'उपयोगकर्ता प्रोफ़ाइल', bn: 'ব্যবহারকারী প্রোফাইল' },
+        editProfileTitle: { en: 'Edit Profile', hi: 'प्रोफ़ाइल संपादित करें', bn: 'প্রোফাইল সম্পাদনা করুন' },
+        profileUserIdLabel: { en: 'User Id:', hi: 'उपयोगकर्ता आईडी:' },
+        profileNameLabel: { en: 'Name:', hi: 'नाम:' },
+        profileAgeLabel: { en: 'Age:', hi: 'आयु:' },
+        yrUnit: { en: 'yr', hi: 'वर्ष' },
+        profileGenderLabel: { en: 'Gender:', hi: 'लिंग:' },
+        profileHeightLabel: { en: 'Height:', hi: 'ऊंचाई:' },
+        profileHeightLabelFull: { en: 'Height (cm)', hi: 'ऊंचाई (सेमी)' },
+        cmUnit: { en: 'cm', hi: 'सेमी' },
+        profileWeightLabel: { en: 'Weight:', hi: 'वजन:' },
+        profileWeightLabelFull: { en: 'Weight (kg)', hi: 'वजन (किग्रा)' },
+        kgUnit: { en: 'kg', hi: 'किग्रा' },
+        profileReminders: { en: 'Reminders', hi: 'रिमाइंडर' },
+        profileProgress: { en: 'Your Health Progress (Week)', hi: 'आपकी स्वास्थ्य प्रगति (सप्ताह)' },
+        logoutButton: { en: 'Logout', hi: 'लॉग आउट' },
+        dayMon: { en: 'Mon', hi: 'सोम' }, dayTue: { en: 'Tue', hi: 'मंगल' }, dayWed: { en: 'Wed', hi: 'बुध' }, dayThu: { en: 'Thu', hi: 'गुरु' }, dayFri: { en: 'Fri', hi: 'शुक्र' }, daySat: { en: 'Sat', hi: 'शनि' }, daySun: { en: 'Sun', hi: 'रवि' },
+        addReminderTitle: {en: 'Add Medicine Reminder', hi: 'दवा रिमाइंडर जोड़ें'},
+        medNameLabel: {en: 'Medicine Name', hi: 'दवा का नाम'},
+        medTimesLabel: {en: 'Times (e.g., 08:00, 22:00)', hi: 'समय (उदा. 08:00, 22:00)'},
+        medMealLabel: {en: 'Meal', hi: 'भोजन'},
+        cancelBtn: {en: 'Cancel', hi: 'रद्द करें'},
+        saveBtn: {en: 'Save', hi: 'सहेजें'},
+        uploadPhotoLabel: { en: 'Click to upload (Optional)', hi: 'अपलोड करने के लिए क्लिक करें (वैकल्पिक)' },
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // General elements from source
+      const screenContent = document.querySelector('.screen-content');
+      const menuBtn = document.querySelector('#menu-btn');
+      const userBtn = document.querySelector('#user-btn');
+      const slideOut = document.querySelector('#menu-panel');
+      const userSlideOut = document.querySelector('#user-panel');
+      const closeButtons = document.querySelectorAll('.close-button');
+      const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+      const locationDisplay = document.querySelector('.location-display');
+      const hospitalList = document.querySelector('.slide-out .hospital-list');
+      let hasFetchedLocation = false;
+      const reminderModal = document.querySelector('.reminder-modal-overlay');
+      const addReminderBtn = document.querySelector('.add-reminder-btn');
+      const cancelReminderBtn = reminderModal.querySelector('.modal-cancel-btn');
+      const reminderForm = document.getElementById('reminder-form');
+      const reminderList = document.querySelector('.user-slide-out .reminder-list');
+      let reminders = JSON.parse(localStorage.getItem('microClinicReminders')) || [];
+      const userSlideOutPanel = document.querySelector('.user-slide-out');
+      const editProfileBtn = document.querySelector('.edit-profile-btn');
+      const profileEditForm = document.querySelector('#profile-edit-form');
+      const cancelProfileEditBtn = document.querySelector('#cancel-profile-edit');
+      const chatbotFab = document.getElementById('chatbot-fab');
+      const chatbotWindow = document.getElementById('chatbot-window');
+      const chatbotMessages = document.getElementById('chatbot-messages');
+      const chatbotInputForm = document.getElementById('chatbot-input-form');
+      const chatbotInput = document.getElementById('chatbot-input');
+      const chatbotClearBtn = document.getElementById('chatbot-clear-btn');
+      
+      // Variables for Medicine Record Page
+      const recordListContainer = document.getElementById('record-list');
+      const addRecordBtn = document.getElementById('add-record-btn');
+      const recordModal = document.getElementById('record-modal');
+      const recordForm = document.getElementById('record-form');
+      const cancelRecordBtn = recordModal.querySelector('.modal-cancel-btn');
+      const imageInput = document.getElementById('med-image-input');
+      const imagePreview = document.getElementById('image-preview');
+      let medRecords = JSON.parse(localStorage.getItem('medRecords')) || [];
+
+      // CHATBOT
+      const toggleChatbot = () => { screenContent.classList.toggle('chatbot-is-open'); chatbotWindow.classList.toggle('open'); chatbotFab.classList.toggle('open'); };
+      const addMessage = (text, sender) => { const messageElement = document.createElement('div'); messageElement.classList.add('message', `${sender}-message`); const messageContent = document.createElement('div'); messageContent.classList.add('message-content'); messageContent.textContent = text; messageElement.appendChild(messageContent); chatbotMessages.appendChild(messageElement); chatbotMessages.scrollTop = chatbotMessages.scrollHeight; };
+      chatbotFab.addEventListener('click', toggleChatbot);
+      chatbotInputForm.addEventListener('submit', (e) => { e.preventDefault(); const userText = chatbotInput.value.trim(); if (userText) { addMessage(userText, 'user'); chatbotInput.value = ''; addMessage('I am a demo AI. I cannot process requests.', 'ai'); } });
+      chatbotClearBtn.addEventListener('click', () => { chatbotMessages.innerHTML = ''; addMessage(languageData.chatbotInitialGreeting[savedLang] || languageData.chatbotInitialGreeting.en, 'ai'); });
+      
+      // LANGUAGE
+      function changeLanguage(lang) { if (!lang || !languageData) return; document.documentElement.lang = lang; document.querySelectorAll('[data-key]').forEach(elem => { const key = elem.dataset.key; const translation = languageData[key]?.[lang]; if (translation !== undefined) elem.textContent = translation; }); document.querySelectorAll('[data-title-key]').forEach(elem => { const key = elem.dataset.titleKey; const translation = languageData[key]?.[lang]; if (translation !== undefined) elem.title = translation; }); document.querySelectorAll('[data-placeholder-key]').forEach(elem => { const key = elem.dataset.placeholderKey; const translation = languageData[key]?.[lang]; if (translation !== undefined) elem.placeholder = translation; }); if (chatbotMessages.children.length <= 1) { chatbotMessages.innerHTML = ''; const initialGreeting = languageData.chatbotInitialGreeting[lang] || languageData.chatbotInitialGreeting.en; addMessage(initialGreeting, 'ai'); } document.querySelectorAll('.lang-button').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang)); localStorage.setItem('preferredLanguage', lang); }
+      if (document.querySelector('.language-selector')) { document.querySelector('.language-selector').addEventListener('click', (event) => { const button = event.target.closest('.lang-button'); if (button) changeLanguage(button.dataset.lang); }); }
+      
+      // SLIDE PANELS & MODALS
+      function closeSlide(panelElement) { if (!panelElement || !panelElement.classList.contains('active')) return; panelElement.classList.remove('active'); if(panelElement.classList.contains('user-slide-out') && panelElement.classList.contains('edit-mode')){ exitEditMode(); } if (panelElement.classList.contains('slide-out')) screenContent.classList.remove('slide-active'); else if (panelElement.classList.contains('user-slide-out')) screenContent.classList.remove('user-slide-active'); }
+      function closeAllSlides(...panelsToKeepOpen) { [slideOut, userSlideOut].forEach(panel => { if (!panelsToKeepOpen.includes(panel)) closeSlide(panel); }); }
+      menuBtn.addEventListener('click', (e) => { e.stopPropagation(); closeAllSlides(slideOut); slideOut.classList.add('active'); screenContent.classList.add('slide-active'); if (!hasFetchedLocation) handleGeolocation(); });
+      userBtn.addEventListener('click', (e) => { e.stopPropagation(); closeAllSlides(userSlideOut); userSlideOut.classList.add('active'); screenContent.classList.add('user-slide-active'); });
+      closeButtons.forEach(button => button.addEventListener('click', (e) => { e.stopPropagation(); const panelToClose = e.target.closest('.slide-out, .user-slide-out'); closeSlide(panelToClose); }));
+      
+      // FIXED: LIVE LOCATION & HOSPITALS (Switched to simulated version for reliability)
+      async function fetchReverseGeocode() {
+          await new Promise (resolve => setTimeout(resolve, 800));
+          locationDisplay.innerHTML = `<i class="fas fa-map-marker-alt"></i> Location: Delhi, India`;
+      }
+      async function fetchNearbyHospitals() {
+          await new Promise (resolve => setTimeout(resolve, 1500));
+          const simulatedHospitals = [
+              { name: 'Banarsidas Chandiwala Institute of Medical Sciences', distance: '300m' },
+              { name: 'Holy Family Hospital, Okhla', distance: '4.8km' },
+              { name: 'Fortis Escorts Heart Institute, Okhla', distance: '5.5km' },
+              { name: 'Indraprastha Apollo Hospital, Sarita Vihar', distance: '6.5km' }
+          ];
+          hospitalList.innerHTML = '';
+          simulatedHospitals.forEach(hospital => {
+              const li = document.createElement('li');
+              li.textContent = `${hospital.name}: ${hospital.distance}`;
+              hospitalList.appendChild(li);
+          });
+      }
+      function handleGeolocation() {
+          locationDisplay.innerHTML = `<i class="fas fa-spinner fa-spin loading-spinner"></i> Finding location...`;
+          hospitalList.innerHTML = `<li class="list-placeholder"><i class="fas fa-spinner fa-spin loading-spinner"></i> Loading hospitals...</li>`;
+          fetchReverseGeocode();
+          fetchNearbyHospitals();
+          hasFetchedLocation = true;
+      }
+
+      // USER PROFILE
+      function enterEditMode() { userSlideOutPanel.classList.add('edit-mode'); }
+      function exitEditMode() { userSlideOutPanel.classList.remove('edit-mode'); }
+      editProfileBtn.addEventListener('click', enterEditMode);
+      cancelProfileEditBtn.addEventListener('click', exitEditMode);
+      profileEditForm.addEventListener('submit', (e) => { e.preventDefault(); /* Save logic here */ exitEditMode(); });
+      
+      // === UPDATED: REMINDERS (FOR USER PANEL) with full functionality ===
+      function openReminderModal() { closeSlide(userSlideOut); screenContent.classList.add('modal-is-open'); reminderModal.classList.add('active'); }
+      function closeReminderModal() { screenContent.classList.remove('modal-is-open'); reminderModal.classList.remove('active'); reminderForm.reset(); }
+      function saveReminders() { localStorage.setItem('microClinicReminders', JSON.stringify(reminders)); }
+      function renderReminders() { 
+          reminderList.innerHTML = ''; 
+          if (reminders.length === 0) { 
+              const placeholder = document.createElement('p'); 
+              placeholder.className = 'list-placeholder'; 
+              placeholder.textContent = 'No reminders added yet.'; 
+              reminderList.appendChild(placeholder); 
+              return; 
+          } 
+          reminders.forEach(reminder => { 
+              const reminderEl = document.createElement('li'); 
+              reminderEl.className = 'reminder-item'; 
+              reminderEl.dataset.id = reminder.id; 
+              reminderEl.innerHTML = ` <div class="reminder-info"> <i class="fas fa-pills"></i> <div class="reminder-text"> <p class="med-name">${reminder.name}</p> <p class="med-details">${reminder.times} - ${reminder.meal}</p> </div> </div> <button class="delete-reminder-btn" title="Delete Reminder"><i class="fas fa-trash-alt"></i></button> `; 
+              reminderList.appendChild(reminderEl); 
+          }); 
+      }
+      addReminderBtn.addEventListener('click', openReminderModal);
+      cancelReminderBtn.addEventListener('click', closeReminderModal);
+      reminderModal.addEventListener('click', (e) => { if(e.target === reminderModal) closeReminderModal(); });
+      reminderForm.addEventListener('submit', (e) => { 
+          e.preventDefault(); 
+          reminders.push({ 
+              id: Date.now(), 
+              name: document.getElementById('reminder-med-name').value.trim(), 
+              times: document.getElementById('med-times').value.trim(), 
+              meal: document.getElementById('med-meal').value, 
+          }); 
+          saveReminders(); 
+          renderReminders(); 
+          closeReminderModal(); 
+      });
+      reminderList.addEventListener('click', (e) => { 
+          const deleteBtn = e.target.closest('.delete-reminder-btn'); 
+          if (deleteBtn) { 
+              const reminderItem = deleteBtn.closest('.reminder-item'); 
+              if (reminderItem) { 
+                  reminders = reminders.filter(r => r.id !== parseInt(reminderItem.dataset.id, 10)); 
+                  saveReminders(); 
+                  renderReminders(); 
+              } 
+          } 
+      });
+
+      // Functions for Medicine Record Page
+      function renderRecords() {
+          recordListContainer.innerHTML = '';
+          const lang = localStorage.getItem('preferredLanguage') || 'en';
+          if (medRecords.length === 0) {
+              recordListContainer.innerHTML = `<p class="list-placeholder" data-key="medRecordPlaceholder">${languageData.medRecordPlaceholder[lang]}</p>`;
+              return;
+          }
+          medRecords.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+          medRecords.forEach((record, index) => {
+              const recordEl = document.createElement('div');
+              recordEl.className = 'record-item';
+              recordEl.dataset.id = record.id;
+              recordEl.style.animationDelay = `${index * 0.08}s`;
+              const timestamp = new Date(record.timestamp);
+              const dateString = timestamp.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+              const timeString = timestamp.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+              const imageHtml = record.imageSrc ? `<img src="${record.imageSrc}" alt="${record.name}" class="med-image">` : `<div class="med-image-placeholder"><i class="fa-solid fa-pills"></i></div>`;
+              recordEl.innerHTML = `${imageHtml}
+                <div class="record-info">
+                  <h3>${record.name}</h3>
+                  <p>${dateString} at ${timeString}</p>
+                </div>
+                <button class="delete-record-btn" title="Delete Record">&times;</button>`;
+              recordListContainer.appendChild(recordEl);
+          });
+      }
+      function saveRecords() { localStorage.setItem('medRecords', JSON.stringify(medRecords)); }
+      function openRecordModal() { screenContent.classList.add('modal-is-open'); recordModal.classList.add('active'); }
+      function closeRecordModal() { screenContent.classList.remove('modal-is-open'); recordModal.classList.remove('active'); recordForm.reset(); imagePreview.style.display = 'none'; imagePreview.innerHTML = ''; }
+      addRecordBtn.addEventListener('click', openRecordModal);
+      cancelRecordBtn.addEventListener('click', closeRecordModal);
+      recordModal.addEventListener('click', (e) => { if (e.target === recordModal) closeRecordModal(); });
+      imageInput.addEventListener('change', function() { const file = this.files[0]; if (file) { const reader = new FileReader(); reader.onload = (e) => { imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`; imagePreview.style.display = 'block'; }; reader.readAsDataURL(file); } });
+      recordForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const medName = document.getElementById('med-name').value.trim();
+          if (!medName) return;
+          const newRecord = { 
+              id: Date.now(), 
+              name: medName, 
+              timestamp: new Date().toISOString(), 
+              imageSrc: imagePreview.querySelector('img') ? imagePreview.querySelector('img').src : null 
+          };
+          medRecords.push(newRecord);
+          saveRecords(); renderRecords(); closeRecordModal();
+      });
+
+      recordListContainer.addEventListener('click', (e) => {
+          const deleteBtn = e.target.closest('.delete-record-btn');
+          if (!deleteBtn) return;
+
+          const recordItem = deleteBtn.closest('.record-item');
+          if (!recordItem) return;
+
+          // Get the unique ID of the record to delete 
+          const recordId = parseInt(recordItem.dataset.id, 10);
+
+          // Remove from memory
+          medRecords = medRecords.filter(r => r.id !== recordId);
+
+          // Save updated list to localStorage
+          saveRecords();
+
+          // Remove immediately from DOM
+          recordItem.remove();
+
+          // If no records left, show placeholder
+          if (medRecords.length === 0) {
+              renderRecords();
+          }
+      });
+      
+      // Initial Page Load
+      changeLanguage(savedLang);
+      renderRecords();
+      renderReminders();
+    });
+   </script>
+</body>
+</html>

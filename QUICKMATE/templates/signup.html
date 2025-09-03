@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up - QUICKMATE</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+      :root {
+        /* --- NEW: Blue and Orange Theme inspired by the logo --- */
+        --accent-color: #ff7618; /* Vibrant Orange for CTA */
+        --accent-dark: #e66000;
+        --accent-glow: rgba(255, 118, 24, 0.35);
+
+        --interaction-color: #1497d7; /* Professional Blue for links and focus */
+        --interaction-dark: #107ab5;
+        --interaction-glow: rgba(20, 151, 215, 0.4);
+
+        --page-bg: #e8f4fa; /* Light, airy blue background */
+        --phone-body: #f7f9fa; /* A cooler off-white for the screen */
+        --text-primary: #1a2b34; /* Dark blue-grey for high contrast */
+        --text-secondary: #5a6a72; /* Muted grey for supporting text */
+        
+        --white-color: #ffffff;
+        --border-color: #dce4e8; /* Cooler border color */
+        --danger-color: #e53935;
+        /* --- ADDED DANGER VARIABLES --- */
+        --danger-dark: #c62828;
+        --danger-glow: rgba(229, 57, 53, 0.35);
+        
+        --border-radius-phone: 40px;
+        --spacing-unit: 8px;
+        --transition-fast: 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --transition-smooth: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+
+      * {
+        margin: 0; padding: 0; box-sizing: border-box;
+      }
+
+      html, body {
+        height: 100%; width: 100%;
+        font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+
+      body {
+        background-color: var(--page-bg);
+        display: flex; align-items: center; justify-content: center;
+        -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+        padding: 20px 0;
+      }
+
+      .smartphone {
+        width: 360px; height: 100%; max-height: 700px;
+        background-color: var(--white-color);
+        border: none; padding: 0;
+        border-radius: var(--border-radius-phone);
+        box-shadow: 0 25px 60px -12px rgba(0,0,0,0.25), 0 0px 15px rgba(0,0,0,0.1);
+        display: flex; overflow: hidden;
+      }
+
+      .screen-content {
+        width: 100%; height: 100%; background-color: var(--phone-body);
+        border-radius: var(--border-radius-phone);
+        display: flex; flex-direction: column; overflow: hidden;
+        position: relative;
+        transition: box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease-out;
+      }
+
+      .app-main {
+        flex-grow: 1; display: flex; flex-direction: column;
+        padding: calc(var(--spacing-unit) * 3);
+        overflow-y: auto;
+      }
+
+      /* Scrollbar styling for a better look */
+      .app-main::-webkit-scrollbar {
+          width: 5px;
+      }
+      .app-main::-webkit-scrollbar-track {
+          background: transparent;
+      }
+      .app-main::-webkit-scrollbar-thumb {
+          background: var(--border-color);
+          border-radius: 10px;
+      }
+      .app-main::-webkit-scrollbar-thumb:hover {
+          background: var(--text-secondary);
+      }
+
+      .main-content-wrapper {
+        text-align: center;
+        padding-bottom: var(--spacing-unit);
+      }
+      
+      .main-content-wrapper h1 { 
+        color: var(--text-primary); font-size: 28px; font-weight: 800;
+        margin-bottom: calc(var(--spacing-unit) * 1.5);
+      }
+      
+      .main-content-wrapper > p {
+        color: var(--text-secondary); font-size: 15px; line-height: 1.6;
+        margin-top: calc(var(--spacing-unit) * 1); max-width: 280px;
+        margin-left: auto; margin-right: auto;
+      }
+
+      .signup-form { 
+        width: 100%; display: flex; flex-direction: column; align-items: center; 
+        margin-top: calc(var(--spacing-unit) * 3); 
+        gap: calc(var(--spacing-unit) * 1.5);
+      }
+      
+      .form-group { 
+        width: 100%; text-align: left;
+      }
+      
+      .form-group label {
+        display: block; font-size: 14px; font-weight: 600;
+        color: var(--text-primary); margin-bottom: var(--spacing-unit);
+      }
+      
+      .input-wrapper {
+        position: relative;
+        width: 100%;
+      }
+      
+      .input-icon {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 16px;
+        transition: color var(--transition-fast);
+        pointer-events: none;
+      }
+
+      .input-icon.prefix {
+        left: 16px;
+      }
+
+      .input-icon.suffix {
+        right: 16px;
+        cursor: pointer;
+        pointer-events: auto;
+      }
+
+      .themed-input {
+        width: 100%; padding: 14px 16px;
+        border: 1px solid var(--border-color); background-color: var(--white-color);
+        border-radius: 12px; font-size: 15px; color: var(--text-primary);
+        font-family: 'Manrope', sans-serif; 
+        transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+        -moz-appearance: none; -webkit-appearance: none; appearance: none;
+      }
+
+      .themed-input.with-prefix-icon {
+        padding-left: 45px;
+      }
+      .themed-input.with-suffix-icon {
+        padding-right: 45px;
+      }
+
+      .select-wrapper::after {
+          content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+          position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
+          color: var(--text-secondary); pointer-events: none; 
+          transition: color var(--transition-fast);
+      }
+
+      .themed-input:focus {
+        outline: none; border-color: var(--interaction-color);
+        box-shadow: 0 0 0 3px var(--interaction-glow);
+      }
+
+      .input-wrapper:focus-within .input-icon,
+      .select-wrapper:focus-within::after {
+        color: var(--interaction-color);
+      }
+
+      /* --- UPDATED BUTTON STYLES --- */
+      .btn-signup { 
+        position: relative;
+        background: linear-gradient(135deg, var(--danger-color), var(--danger-dark));
+        color: var(--white-color);
+        border: none;
+        padding: 15px;
+        font-size: 1.1em;
+        font-weight: 700;
+        border-radius: 14px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: var(--spacing-unit);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        text-decoration: none;
+      }
+      
+      .btn-signup:hover { 
+        transform: translateY(-4px); 
+        box-shadow: 0 8px 25px var(--danger-glow);
+      }
+      /* --- END OF UPDATED STYLES --- */
+      
+      .error {
+        color: var(--danger-color);
+        background-color: rgba(229, 57, 53, 0.1);
+        border: 1px solid rgba(229, 57, 53, 0.2);
+        padding: 10px; border-radius: 8px; width: 100%;
+        font-size: 14px; text-align: center; order: 99; 
+      }
+
+      .login-link {
+        margin-top: 25px; font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      .login-link a {
+        color: var(--interaction-color); font-weight: 600;
+        text-decoration: none; transition: color var(--transition-fast);
+      }
+
+      .login-link a:hover {
+        color: var(--interaction-dark); text-decoration: underline;
+      }
+    </style>
+</head>
+<body>
+    
+  <div class="smartphone">
+    <div class="screen-content">
+      
+      <main class="app-main">
+          <div class="main-content-wrapper">
+              <h1>Create Account</h1>
+              <p>Join QUICKMATE today. It's quick and easy!</p>
+
+              <form method="POST" action="{{ url_for('signup') }}" class="signup-form">
+                
+                <div class="form-group">
+                  <label for="first_name">First Name</label>
+                  <div class="input-wrapper">
+                    <i class="fas fa-user input-icon prefix"></i>
+                    <input type="text" name="first_name" id="first_name" class="themed-input with-prefix-icon" placeholder="Enter your first name" required>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="last_name">Last Name</label>
+                  <div class="input-wrapper">
+                    <i class="fas fa-user input-icon prefix"></i>
+                    <input type="text" name="last_name" id="last_name" class="themed-input with-prefix-icon" placeholder="Enter your last name" required>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="email">Email</label>
+                  <div class="input-wrapper">
+                    <i class="fas fa-envelope input-icon prefix"></i>
+                    <input type="email" name="email" id="email" class="themed-input with-prefix-icon" placeholder="Enter your email" required>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock input-icon prefix"></i>
+                        <input type="password" name="password" id="password" class="themed-input with-prefix-icon with-suffix-icon" placeholder="Create a password" required>
+                        <i class="fas fa-eye input-icon suffix" id="togglePassword"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="age">Age</label>
+                  <div class="input-wrapper">
+                    <i class="fas fa-birthday-cake input-icon prefix"></i>
+                    <input type="number" name="age" id="age" min="1" class="themed-input with-prefix-icon" placeholder="Your age" required>
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <div class="input-wrapper select-wrapper">
+                        <i class="fas fa-venus-mars input-icon prefix"></i>
+                        <select name="gender" id="gender" class="themed-input with-prefix-icon" required>
+                            <option value="" disabled selected>Select your gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-signup">Sign Up</button>
+                
+                {% if error %}
+                    <p class="error">{{ error }}</p>
+                {% endif %}
+
+              </form>
+
+              <div class="login-link">
+                <p>Already have an account? <a href="{{ url_for('login') }}" class="smooth-redirect">Login here</a></p>
+              </div>
+          </div>
+      </main>
+      
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const screenContent = document.querySelector('.screen-content');
+      
+      // --- Smooth page transition logic ---
+      document.body.addEventListener('click', (e) => {
+          const link = e.target.closest('a.smooth-redirect');
+          if (link) {
+              e.preventDefault(); 
+              const destination = link.href; 
+              
+              screenContent.style.transition = 'opacity 0.4s ease-out';
+              screenContent.style.opacity = '0';
+              
+              setTimeout(() => {
+                  window.location.href = destination;
+              }, 400); 
+          }
+      });
+
+      // --- Password Visibility Toggle Logic ---
+      const togglePassword = document.querySelector('#togglePassword');
+      const passwordInput = document.querySelector('#password');
+
+      if(togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function () {
+            // Toggle the type attribute
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // Toggle the eye / eye-slash icon
+            this.classList.toggle('fa-eye-slash');
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>

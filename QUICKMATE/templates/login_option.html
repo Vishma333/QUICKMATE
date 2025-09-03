@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Options - QuickMate</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+      :root {
+        --accent-color: #ff7618;
+        --accent-dark: #e66000;
+        --accent-glow: rgba(255, 118, 24, 0.35);
+
+        --interaction-color: #1497d7;
+        --interaction-dark: #107ab5;
+        --interaction-glow: rgba(20, 151, 215, 0.4);
+
+        --page-bg: #e8f4fa;
+        --phone-body: #f7f9fa;
+        --text-primary: #1a2b34;
+        --text-secondary: #5a6a72;
+        
+        --white-color: #ffffff;
+        --border-color: #dce4e8;
+        
+        --danger-color: #e53935;
+        --danger-dark: #c62828;
+        --danger-glow: rgba(229, 57, 53, 0.35);
+        
+        --border-radius-phone: 40px;
+        --spacing-unit: 8px;
+        --transition-fast: 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --transition-smooth: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+
+      * {
+        margin: 0; padding: 0; box-sizing: border-box;
+      }
+
+      html, body {
+        height: 100%; width: 100%;
+        font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+
+      body {
+        background-color: var(--page-bg);
+        display: flex; align-items: center; justify-content: center;
+        -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+        padding: 20px;
+      }
+
+      .smartphone {
+        width: 360px; height: 100%; max-height: 700px; background-color: var(--white-color);
+        border-radius: var(--border-radius-phone);
+        box-shadow: 0 25px 60px -12px rgba(0,0,0,0.25), 0 0px 15px rgba(0,0,0,0.1);
+        display: flex; overflow: hidden;
+      }
+
+      .screen-content {
+        width: 100%; height: 100%; background-color: var(--phone-body);
+        border-radius: var(--border-radius-phone);
+        display: flex; flex-direction: column; overflow: hidden;
+        position: relative;
+      }
+
+      /* --- Loading Screen Styles START --- */
+      #loading-screen {
+          position: absolute; top: 0; left: 0;
+          width: 100%; height: 100%;
+          background-color: var(--phone-body);
+          display: flex; justify-content: center; align-items: center;
+          z-index: 1000; transition: opacity 0.6s ease-out, visibility 0.6s;
+          opacity: 1; visibility: visible;
+      }
+
+      #loading-screen.hidden {
+          opacity: 0; pointer-events: none; visibility: hidden;
+      }
+
+      #loading-logo {
+          width: 120px; height: auto;
+          filter: blur(5px); opacity: 0;
+          animation: revealLogo 1.5s forwards;
+      }
+
+      @keyframes revealLogo {
+          0% { filter: blur(5px); opacity: 0; transform: scale(0.8); }
+          70% { filter: blur(0); opacity: 1; transform: scale(1.05); }
+          100% { filter: blur(0); opacity: 1; transform: scale(1); }
+      }
+      /* --- Loading Screen Styles END --- */
+
+      .app-main {
+        flex-grow: 1; display: flex; flex-direction: column;
+        padding: calc(var(--spacing-unit) * 3);
+        justify-content: center;
+        opacity: 0; /* Initially hidden */
+        animation: fadeIn 0.5s 0.2s ease-in forwards;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      .screen-content.loaded .app-main {
+        opacity: 1; /* Ensure visible after load */
+      }
+      
+      .options-container {
+        text-align: center;
+      }
+      
+      .options-container h1 { 
+        color: var(--text-primary); font-size: 28px; font-weight: 800;
+        margin-bottom: var(--spacing-unit);
+      }
+      
+      .options-container p {
+        color: var(--text-secondary); font-size: 15px; line-height: 1.6;
+        margin-top: calc(var(--spacing-unit)); max-width: 280px;
+        margin-left: auto; margin-right: auto;
+        margin-bottom: calc(var(--spacing-unit) * 5);
+      }
+      
+      .btn-option {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-decoration: none;
+          color: var(--white-color);
+          width: 100%;
+          padding: 18px;
+          font-size: 16px;
+          font-weight: 700;
+          border: none;
+          border-radius: 14px;
+          margin-top: 16px;
+          cursor: pointer;
+          position: relative;
+          overflow: hidden;
+          transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+      }
+      
+      .btn-option .icon {
+        margin-right: 12px;
+        font-size: 1.2em;
+        line-height: 1;
+      }
+      
+      .btn-option:hover {
+        transform: translateY(-4px);
+      }
+      
+      /* --- Animation on reveal --- */
+      .options-container > * { 
+        animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; 
+        opacity: 0;
+      }
+      .options-container h1 { animation-delay: 0s; } 
+      .options-container p { animation-delay: 0.1s; } 
+      .options-container .btn-user { animation-delay: 0.2s; } 
+      /* --- ADDED OR DIVIDER & UPDATED ADMIN BTN DELAY --- */
+      .options-container .or-divider { animation-delay: 0.3s; }
+      .options-container .btn-admin { animation-delay: 0.4s; }
+      
+      @keyframes fadeInUp { 
+        from { opacity: 0; transform: translateY(20px); } 
+        to { opacity: 1; transform: translateY(0); } 
+      }
+      
+      .btn-user,
+      .btn-admin {
+        background: linear-gradient(135deg, var(--danger-color), var(--danger-dark));
+      }
+      .btn-user:hover,
+      .btn-admin:hover {
+        box-shadow: 0 8px 25px var(--danger-glow);
+      }
+
+      /* --- ADDED STYLES FOR "OR" DIVIDER --- */
+      .or-divider {
+          display: flex;
+          align-items: center;
+          color: var(--text-secondary);
+          font-size: 14px;
+          font-weight: 500;
+          margin-top: 16px;
+      }
+      .or-divider::before,
+      .or-divider::after {
+          content: "";
+          flex-grow: 1;
+          height: 1px;
+          background: var(--border-color);
+      }
+      .or-divider::before {
+          margin-right: 12px;
+      }
+      .or-divider::after {
+          margin-left: 12px;
+      }
+      
+    </style>
+</head>
+<body>
+    
+  <div class="smartphone">
+    <div class="screen-content" id="screen-content">
+
+      <!-- Loading Screen -->
+      <div id="loading-screen">
+          <img id="loading-logo" src="https://i.supaimg.com/f4803944-281c-4329-b679-3216098e5d09.png" alt="QuickMate Logo">
+      </div>
+      
+      <main class="app-main">
+          <div class="options-container">
+              <h1>Choose Your Role</h1>
+              <p>Select how you would like to sign in to QuickMate.</p>
+              
+              <a href="{{ url_for('login') }}" class="btn-option btn-user smooth-redirect">
+                  <i class="fas fa-user icon"></i>
+                  <span>Continue as User</span>
+              </a>
+
+              <!-- "OR" DIVIDER ADDED HERE -->
+              <div class="or-divider">or</div>
+
+              <a href="{{ url_for('admin_login') }}" class="btn-option btn-admin smooth-redirect">
+                  <i class="fas fa-user-shield icon"></i>
+                  <span>Continue as Admin</span>
+              </a>
+          </div>
+      </main>
+      
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // --- Loading Screen Logic ---
+      const loadingScreen = document.getElementById('loading-screen');
+      const screenContent = document.getElementById('screen-content');
+      
+      // Simulate loading and reveal content
+      setTimeout(() => {
+        if (loadingScreen) {
+          loadingScreen.classList.add('hidden');
+        }
+        if (screenContent) {
+          screenContent.classList.add('loaded');
+        }
+      }, 2200); 
+      
+      // --- Smooth Page Transition Logic ---
+      document.body.addEventListener('click', (e) => {
+          const link = e.target.closest('a.smooth-redirect');
+          if (link) {
+              e.preventDefault(); 
+              const destination = link.href; 
+              
+              if(screenContent) {
+                screenContent.style.transition = 'opacity 0.4s ease-out';
+                screenContent.style.opacity = '0';
+              }
+              
+              setTimeout(() => {
+                  window.location.href = destination;
+              }, 400); 
+          }
+      });
+    });
+  </script>
+
+</body>
+</html>

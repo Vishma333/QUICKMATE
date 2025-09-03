@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Login - QuickMate</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+      :root {
+        --accent-color: #ff7618;
+        --accent-dark: #e66000;
+        --accent-glow: rgba(255, 118, 24, 0.35);
+
+        --interaction-color: #1497d7;
+        --interaction-dark: #107ab5;
+        --interaction-glow: rgba(20, 151, 215, 0.4);
+
+        --page-bg: #e8f4fa;
+        --phone-body: #f7f9fa;
+        --text-primary: #1a2b34;
+        --text-secondary: #5a6a72;
+        
+        --white-color: #ffffff;
+        --border-color: #dce4e8;
+        --danger-color: #e53935;
+        /* --- ADDED DANGER VARIABLES --- */
+        --danger-dark: #c62828;
+        --danger-glow: rgba(229, 57, 53, 0.35);
+        
+        --border-radius-phone: 40px;
+        --spacing-unit: 8px;
+        --transition-fast: 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --transition-smooth: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+
+      * {
+        margin: 0; padding: 0; box-sizing: border-box;
+      }
+
+      html, body {
+        height: 100%; width: 100%;
+        font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+
+      body {
+        background-color: var(--page-bg);
+        display: flex; align-items: center; justify-content: center;
+        -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+        padding: 20px;
+      }
+
+      .smartphone {
+        width: 360px; height: 100%; max-height: 700px; background-color: var(--white-color);
+        border-radius: var(--border-radius-phone);
+        box-shadow: 0 25px 60px -12px rgba(0,0,0,0.25), 0 0px 15px rgba(0,0,0,0.1);
+        display: flex; overflow: hidden;
+      }
+
+      .screen-content {
+        width: 100%; height: 100%; background-color: var(--phone-body);
+        border-radius: var(--border-radius-phone);
+        display: flex; flex-direction: column; overflow: hidden;
+        position: relative;
+        opacity: 0;
+        animation: fadeIn 0.4s ease-in forwards;
+      }
+      
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+      .app-main {
+        flex-grow: 1; display: flex; flex-direction: column;
+        padding: calc(var(--spacing-unit) * 3);
+        justify-content: center;
+      }
+      
+      .back-btn {
+        position: absolute;
+        top: 25px;
+        left: 25px;
+        font-size: 20px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        z-index: 10;
+        transition: color var(--transition-fast), transform var(--transition-fast);
+      }
+
+      .back-btn:hover {
+        color: var(--interaction-color);
+        transform: scale(1.1);
+      }
+
+      .main-content-wrapper {
+        text-align: center;
+      }
+      
+      .main-content-wrapper h1 { 
+        color: var(--text-primary); font-size: 28px; font-weight: 800;
+        margin-bottom: calc(var(--spacing-unit) * 1.5);
+      }
+      
+      .main-content-wrapper p {
+        color: var(--text-secondary); font-size: 15px; line-height: 1.6;
+        margin-top: calc(var(--spacing-unit) * 1.5); max-width: 280px;
+        margin-left: auto; margin-right: auto;
+      }
+
+      .login-form { 
+        width: 100%; display: flex; flex-direction: column; align-items: center; 
+        margin-top: calc(var(--spacing-unit) * 4); 
+        gap: calc(var(--spacing-unit) * 2);
+      }
+      
+      .form-group { 
+        width: 100%; text-align: left;
+      }
+      
+      .form-group label {
+        display: block; font-size: 14px; font-weight: 600;
+        color: var(--text-primary); margin-bottom: var(--spacing-unit);
+      }
+
+      .input-wrapper {
+        position: relative; width: 100%;
+      }
+      
+      .input-icon {
+        position: absolute; top: 50%;
+        transform: translateY(-50%); color: var(--text-secondary);
+        font-size: 16px; transition: color var(--transition-fast);
+      }
+
+      .input-icon.prefix { left: 16px; }
+      .input-icon.suffix { right: 16px; cursor: pointer; }
+
+      .themed-input {
+        width: 100%; padding: 14px 16px;
+        border: 1px solid var(--border-color); background-color: var(--white-color);
+        border-radius: 12px; font-size: 15px; color: var(--text-primary);
+        font-family: 'Manrope', sans-serif; 
+        transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+      }
+      
+      .themed-input.with-prefix-icon { padding-left: 45px; }
+      .themed-input.with-suffix-icon { padding-right: 45px; }
+
+      .themed-input:focus {
+        outline: none; border-color: var(--interaction-color);
+        box-shadow: 0 0 0 3px var(--interaction-glow);
+      }
+
+      .input-wrapper:focus-within .input-icon { 
+        color: var(--interaction-color);
+      }
+      
+      /* --- UPDATED BUTTON STYLES --- */
+      .btn-admin-login { 
+        position: relative;
+        background: linear-gradient(135deg, var(--danger-color), var(--danger-dark));
+        color: var(--white-color);
+        border: none;
+        padding: 15px;
+        font-size: 1.1em;
+        font-weight: 700;
+        border-radius: 14px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: var(--spacing-unit);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        text-decoration: none;
+      }
+      
+      .btn-admin-login:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px var(--danger-glow);
+      }
+      
+      .error {
+        color: var(--danger-color);
+        background-color: rgba(229, 57, 53, 0.1); border: 1px solid rgba(229, 57, 53, 0.2);
+        padding: 10px; border-radius: 8px;
+        margin-top: 15px; width: 100%; font-size: 14px;
+        text-align: center;
+      }
+      
+      @keyframes fadeInUp { 
+        from { opacity: 0; transform: translateY(20px); } 
+        to { opacity: 1; transform: translateY(0); } 
+      } 
+      
+      .main-content-wrapper > * { 
+        animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; 
+        opacity: 0;
+      }
+      .main-content-wrapper h1 { animation-delay: 0.1s; } 
+      .main-content-wrapper > p { animation-delay: 0.2s; } 
+      .login-form { animation-delay: 0.3s; }
+      
+    </style>
+</head>
+<body>
+    
+  <div class="smartphone">
+    <div class="screen-content" id="screen-content">
+      
+      <a href="{{ url_for('login_option') }}" class="back-btn smooth-redirect"><i class="fas fa-arrow-left"></i></a>
+
+      <main class="app-main">
+          <div class="main-content-wrapper">
+              <h1>Admin Portal</h1>
+              <p>Please enter your administrator credentials.</p>
+              
+              <form method="POST" action="{{ url_for('admin_login') }}" class="login-form">
+                
+                <div class="form-group">
+                  <label for="email">Email</label>
+                  <div class="input-wrapper">
+                    <i class="fas fa-envelope input-icon prefix"></i>
+                    <input type="email" name="email" id="email" class="themed-input with-prefix-icon" placeholder="Enter your admin email" required>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock input-icon prefix"></i>
+                        <input type="password" name="password" id="password" class="themed-input with-prefix-icon with-suffix-icon" placeholder="Enter your password" required>
+                        <i class="fas fa-eye input-icon suffix" id="togglePassword"></i>
+                    </div>
+                </div>
+                
+                {% if error %}
+                    <p class="error">{{ error }}</p>
+                {% endif %}
+
+                <button type="submit" class="btn-admin-login">Login as Admin</button>
+              </form>
+          </div>
+      </main>
+      
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // --- Smooth page transition logic ---
+      const screenContent = document.getElementById('screen-content');
+      document.body.addEventListener('click', (e) => {
+          const link = e.target.closest('a.smooth-redirect');
+          if (link) {
+              e.preventDefault(); 
+              const destination = link.href; 
+              
+              if(screenContent) {
+                screenContent.style.transition = 'opacity 0.4s ease-out';
+                screenContent.style.opacity = '0';
+              }
+              
+              setTimeout(() => {
+                  window.location.href = destination;
+              }, 400); 
+          }
+      });
+
+      // --- Password Visibility Toggle Logic ---
+      const togglePassword = document.querySelector('#togglePassword');
+      const passwordInput = document.querySelector('#password');
+
+      if(togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>
