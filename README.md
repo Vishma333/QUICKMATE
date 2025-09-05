@@ -64,6 +64,8 @@ By combining **Flask, SQLite, AI tools, and real-time communication**, QUICKMATE
 
 ---
 
+## 🗂 Project Structure
+
 QUICKMATE/
 │── static/
 │ ├── uploads/
@@ -181,4 +183,4 @@ This project is licensed under the MIT License – feel free to use, modify, and
 
 Building trust, transparency, and safety in healthcare.
 
-## 🗂 Project Structure
+
