@@ -96,8 +96,8 @@ QUICKMATE/
 
 ## ⚙️ Installation & Setup
 
+
 ### 1️⃣ Clone the repository
-```bash
 git clone https://github.com/Vishma333/QUICKMATE.git
 cd QUICKMATE
 
