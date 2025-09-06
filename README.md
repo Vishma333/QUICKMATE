@@ -53,53 +53,51 @@ By combining **Flask, SQLite, AI tools, and real-time communication**, QUICKMATE
 ---
 
 ## ✨ Key Features
-- 📸 **Medicine & prescription verification** with photo & text  
-- 🎥 **Live ICU monitoring** (secure, encrypted streaming)  
-- 💳 **Transparent billing system** with digital proof  
-- 👨‍⚕️ **Low-cost consultations** with verified junior doctors  
-- 🚨 **Emergency alerts** for hospitals before patient arrival  
-- 🩸 **Real-time rare blood donor registry**  
-- 📝 **Prescription digitization & medical report uploads**  
-- 🩹 **AI-powered first aid guidance**
+- Medicine & prescription verification with photo & text  
+- Live ICU monitoring (secure, encrypted streaming)  
+- Transparent billing system with digital proof  
+- Low-cost consultations with verified junior doctors  
+- Emergency alerts for hospitals before patient arrival  
+- Real-time rare blood donor registry  
+- Prescription digitization & medical report uploads  
+- AI-powered first aid guidance  
 
 ---
 
 ## 🗂 Project Structure
 
 QUICKMATE/
-│── static/
-│ ├── uploads/
-│ ├── doctors.png
-│ ├── logo.png
-│
-│── templates/
-│ ├── admin_dashboard.html
-│ ├── admin_login.html
-│ ├── blood_donation.html
-│ ├── charges.html
-│ ├── consult.html
-│ ├── emergency.html
-│ ├── home.html
-│ ├── icu_view.html
-│ ├── index.html
-│ ├── login_option.html
-│ ├── login.html
-│ ├── medicine_record.html
-│ ├── signup.html
-│
-│── app.py
-│── users.db
-│── uploaded_image.jpg
-│── requirements.txt
-│── README.md
-
+│── static/  
+│ ├── uploads/  
+│ ├── doctors.png  
+│ ├── logo.png  
+│  
+│── templates/  
+│ ├── admin_dashboard.html  
+│ ├── admin_login.html  
+│ ├── blood_donation.html  
+│ ├── charges.html  
+│ ├── consult.html  
+│ ├── emergency.html  
+│ ├── home.html  
+│ ├── icu_view.html  
+│ ├── index.html  
+│ ├── login_option.html  
+│ ├── login.html  
+│ ├── medicine_record.html  
+│ ├── signup.html  
+│  
+│── app.py  
+│── users.db  
+│── uploaded_image.jpg  
+│── requirements.txt  
+│── README.md  
 
 ---
 
 ## ⚙️ Installation & Setup
 
-
-### 1️⃣ Clone the repository
+1️⃣ Clone the repository
 git clone https://github.com/Vishma333/QUICKMATE.git
 cd QUICKMATE
 
@@ -115,6 +113,7 @@ pip install -r requirements.txt
 python app.py
 
 App will start at 👉 http://127.0.0.1:5000/
+
 🛠 Technical Details
 
 Backend: Flask (Python)
@@ -129,7 +128,15 @@ Authentication: Flask-Login, Bcrypt
 
 APIs (Future Integration): Gemini API, Ollama Mistral 7B, Agno Agent for AI report scanning
 
-Deployment: Akash Networks
+🌐 Deployment Options
+
+Render Deployment (Live App): https://quickmate-vunr.onrender.com/login_option
+
+Docker Image:
+
+Pull the image: docker pull kalyanijha/quickmate:latest
+
+Available on Docker Hub: https://hub.docker.com/r/kalyanijha/quickmate
 
 📦 Requirements
 flask==3.0.3
@@ -182,5 +189,3 @@ This project is licensed under the MIT License – feel free to use, modify, and
 🏥 QUICKMATE – Care Without Delay
 
 Building trust, transparency, and safety in healthcare.
-
-
